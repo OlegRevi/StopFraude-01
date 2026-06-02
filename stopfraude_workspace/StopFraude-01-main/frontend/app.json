@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "StopFrauda",
+    "slug": "stopfrauda",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "stopfrauda",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.stopfrauda.app"
+    },
+    "android": {
+      "package": "com.stopfrauda.app",
+      "versionCode": 13,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#6366f1"
+      },
+      "permissions": [
+        "RECORD_AUDIO",
+        "READ_CONTACTS",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "READ_PHONE_STATE",
+        "READ_CALL_LOG",
+        "READ_PHONE_NUMBERS",
+        "ANSWER_PHONE_CALLS",
+        "SYSTEM_ALERT_WINDOW"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "./plugins/withAndroidCallDetection",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1f95dadc-57eb-4301-9305-4df6e41aa9f0"
+      }
+    },
+    "owner": "olegrwvi",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/1f95dadc-57eb-4301-9305-4df6e41aa9f0"
+    }
+  }
+}

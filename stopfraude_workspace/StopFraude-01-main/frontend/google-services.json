@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "664123886979",
+    "project_id": "scamstop-e6e33",
+    "storage_bucket": "scamstop-e6e33.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664123886979:android:eaafc0e6c5f54f6539fab6",
+        "android_client_info": {
+          "package_name": "com.stopfrauda.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEGUrhZbDdcnKrTsNn2HBUn55rJkyYlRE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
