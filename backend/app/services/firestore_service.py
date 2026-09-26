@@ -72,19 +72,22 @@ class FirestoreService:
 
     def get_or_create_user(self, user_id: str, phone_number: Optional[str] = None, display_name: Optional[str] = None) -> Dict[str, Any]:
         if self.db:
-            doc_ref = self.db.collection("users").document(user_id)
-            doc = doc_ref.get()
-            if doc.exists:
-                return doc.to_dict()
-            user_data = {
-                "userId": user_id,
-                "phoneNumber": phone_number or "",
-                "displayName": display_name or "StopFrauda User",
-                "activeProtection": True,
-                "createdAt": datetime.now(timezone.utc).isoformat()
-            }
-            doc_ref.set(user_data)
-            return user_data
+            try:
+                doc_ref = self.db.collection("users").document(user_id)
+                doc = doc_ref.get()
+                if doc.exists:
+                    return doc.to_dict()
+                user_data = {
+                    "userId": user_id,
+                    "phoneNumber": phone_number or "",
+                    "displayName": display_name or "StopFrauda User",
+                    "activeProtection": True,
+                    "createdAt": datetime.now(timezone.utc).isoformat()
+                }
+                doc_ref.set(user_data)
+                return user_data
+            except Exception as e:
+                logger.warning(f"Firestore get_or_create_user failed: {e}. Falling back to in-memory.")
 
         # In-memory fallback
         if user_id not in self._mock_users:
