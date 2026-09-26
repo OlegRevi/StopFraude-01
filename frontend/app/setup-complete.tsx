@@ -24,6 +24,7 @@ import {
   configureCallDetector,
 } from 'expo-call-detector';
 import { EmergencyContact } from '../types';
+import { Colors } from '../constants/theme';
 
 export default function SetupCompleteScreen() {
   const router = useRouter();
@@ -103,7 +104,7 @@ export default function SetupCompleteScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Shield Celebration Icon */}
         <View style={styles.celebrationBox}>
           <View style={styles.celebrationCircle}>
@@ -118,10 +119,10 @@ export default function SetupCompleteScreen() {
 
         {/* SMS Status Box */}
         <View style={styles.smsBox}>
-          <Text style={styles.smsHeader}>📱 Twilio Guardian Dispatch</Text>
+          <Text style={styles.smsHeader}>📱 Guardian SMS Status</Text>
           {loading ? (
             <View style={styles.loadingRow}>
-              <ActivityIndicator size="small" color="#38BDF8" />
+              <ActivityIndicator size="small" color={Colors.primary} />
               <Text style={styles.smsStatusText}>
                 Notifying emergency guardians via SMS...
               </Text>
@@ -130,21 +131,23 @@ export default function SetupCompleteScreen() {
             <Text style={styles.smsStatusText}>{smsStatus}</Text>
           )}
 
-          <View style={styles.guardiansList}>
-            {contacts.map((c, idx) => (
-              <View key={idx} style={styles.guardianItem}>
-                <Text style={styles.guardianName}>• {c.name}</Text>
-                <Text style={styles.guardianPhone}>{c.phone}</Text>
-              </View>
-            ))}
-          </View>
+          {contacts.length > 0 && (
+            <View style={styles.guardiansList}>
+              {contacts.map((c, idx) => (
+                <View key={idx} style={styles.guardianItem}>
+                  <Text style={styles.guardianName}>• {c.name}</Text>
+                  <Text style={styles.guardianPhone}>{c.phone}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Test Call Simulator Section */}
         <View style={styles.simulatorBox}>
           <View style={styles.simulatorHeader}>
             <Text style={styles.simulatorIcon}>🧪</Text>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.simulatorTitle}>Test Call Simulator</Text>
               <Text style={styles.simulatorDesc}>
                 Experience how StopFrauda alerts you when a scammer calls.
@@ -165,7 +168,7 @@ export default function SetupCompleteScreen() {
             disabled={simulating}
           >
             {simulating ? (
-              <ActivityIndicator color="#F8FAFC" />
+              <ActivityIndicator color={Colors.primary} />
             ) : (
               <>
                 <Text style={styles.simulatorButtonText}>
@@ -178,14 +181,16 @@ export default function SetupCompleteScreen() {
         </View>
 
         {/* Go to Dashboard */}
-        <TouchableOpacity
-          style={styles.dashboardButton}
-          activeOpacity={0.8}
-          onPress={handleGoToDashboard}
-        >
-          <Text style={styles.dashboardButtonText}>Enter Dashboard</Text>
-          <Text style={styles.arrowIcon}>→</Text>
-        </TouchableOpacity>
+        <View style={styles.footerContainer}>
+          <TouchableOpacity
+            style={styles.dashboardButton}
+            activeOpacity={0.85}
+            onPress={handleGoToDashboard}
+          >
+            <Text style={styles.dashboardButtonText}>Enter Dashboard</Text>
+            <Text style={styles.arrowIcon}>→</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -194,63 +199,68 @@ export default function SetupCompleteScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 24,
   },
   celebrationBox: {
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 12,
   },
   celebrationCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#064E3B40',
-    borderWidth: 2,
-    borderColor: '#10B981',
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   celebrationEmoji: {
-    fontSize: 40,
+    fontSize: 42,
   },
   stepBadge: {
-    color: '#10B981',
+    color: Colors.primary,
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 1.5,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#94A3B8',
+    fontSize: 15,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 10,
+    lineHeight: 22,
+    paddingHorizontal: 12,
   },
   smsBox: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#334155',
-    marginBottom: 20,
+    borderColor: Colors.border,
+    marginVertical: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   smsHeader: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#38BDF8',
+    color: Colors.textPrimary,
     marginBottom: 8,
   },
   loadingRow: {
@@ -260,109 +270,121 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   smsStatusText: {
-    fontSize: 13,
-    color: '#E2E8F0',
-    lineHeight: 18,
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
   },
   guardiansList: {
     marginTop: 10,
+    gap: 6,
     borderTopWidth: 1,
-    borderTopColor: '#334155',
+    borderTopColor: Colors.borderLight,
     paddingTop: 8,
-    gap: 4,
   },
   guardianItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingVertical: 2,
   },
   guardianName: {
     fontSize: 13,
-    color: '#CBD5E1',
     fontWeight: '600',
+    color: Colors.textPrimary,
   },
   guardianPhone: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
   },
   simulatorBox: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#F59E0B',
-    marginBottom: 24,
+    borderColor: Colors.border,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   simulatorHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    gap: 12,
   },
   simulatorIcon: {
-    fontSize: 28,
-    marginRight: 12,
+    fontSize: 24,
   },
   simulatorTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
   },
   simulatorDesc: {
-    fontSize: 12,
-    color: '#94A3B8',
+    fontSize: 13,
+    color: Colors.textSecondary,
     marginTop: 2,
   },
   simResultCard: {
-    backgroundColor: '#7F1D1D40',
-    borderRadius: 10,
+    backgroundColor: Colors.dangerLight,
+    borderRadius: 12,
     padding: 12,
-    borderWidth: 1,
-    borderColor: '#EF4444',
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
   simResultText: {
-    fontSize: 12,
-    color: '#FCA5A5',
-    lineHeight: 17,
+    color: Colors.dangerDark,
+    fontSize: 13,
+    lineHeight: 18,
   },
   simulatorButton: {
-    backgroundColor: '#D97706',
-    paddingVertical: 14,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.primaryMuted,
+    height: 48,
     borderRadius: 12,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 8,
   },
   simulatorButtonText: {
-    color: '#FFFFFF',
+    color: Colors.primary,
     fontSize: 14,
     fontWeight: '700',
-    marginRight: 8,
   },
   testEmoji: {
     fontSize: 16,
   },
+  footerContainer: {
+    marginTop: 'auto',
+    paddingBottom: 16,
+  },
   dashboardButton: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 16,
-    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0284C7',
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 6,
   },
   dashboardButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: Colors.textInverse,
+    fontSize: 17,
     fontWeight: '700',
     marginRight: 8,
   },
   arrowIcon: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: Colors.textInverse,
+    fontSize: 20,
     fontWeight: '700',
   },
 });

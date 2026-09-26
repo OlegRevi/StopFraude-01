@@ -26,6 +26,13 @@ import {
 } from '../../services/storage';
 import { ApiClient } from '../../services/api';
 import { EmergencyContact, CallLogEntry } from '../../types';
+import { Colors } from '../../constants/theme';
+
+const AVATAR_COLORS = ['#EC4899', '#EF4444', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'];
+
+function getInitialColor(index: number) {
+  return AVATAR_COLORS[index % AVATAR_COLORS.length];
+}
 
 export default function DashboardScreen() {
   const [isActive, setIsActive] = useState(true);
@@ -134,7 +141,7 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Real-time Alert Banner if Active */}
         {activeAlert && (
           <View
@@ -148,12 +155,22 @@ export default function DashboardScreen() {
                 {activeAlert.isUnknown ? '🚨' : '✅'}
               </Text>
               <View style={styles.alertTextContainer}>
-                <Text style={styles.alertBannerTitle}>
+                <Text
+                  style={[
+                    styles.alertBannerTitle,
+                    activeAlert.isUnknown ? styles.alertUnknownTitle : styles.alertSafeTitle,
+                  ]}
+                >
                   {activeAlert.isUnknown
                     ? 'UNKNOWN CALLER DETECTED!'
                     : 'VERIFIED CONTACT CALL'}
                 </Text>
-                <Text style={styles.alertBannerDesc}>
+                <Text
+                  style={[
+                    styles.alertBannerDesc,
+                    activeAlert.isUnknown ? styles.alertUnknownDesc : styles.alertSafeDesc,
+                  ]}
+                >
                   {activeAlert.isUnknown
                     ? `Number ${activeAlert.number} is NOT in contacts. SMS dispatched to ${guardians.length} guardians.`
                     : `${activeAlert.name || 'Known contact'} (${activeAlert.number})`}
@@ -178,24 +195,28 @@ export default function DashboardScreen() {
             <Switch
               value={isActive}
               onValueChange={toggleProtection}
-              trackColor={{ false: '#334155', true: '#0284C7' }}
-              thumbColor={isActive ? '#38BDF8' : '#94A3B8'}
+              trackColor={{ false: Colors.border, true: Colors.primary }}
+              thumbColor="#FFFFFF"
             />
           </View>
 
           <View style={styles.shieldGraphic}>
-            <Text style={styles.shieldEmoji}>{isActive ? '🛡️' : '⚠️'}</Text>
+            <View style={[styles.shieldOuterRing, isActive ? styles.shieldRingActive : styles.shieldRingInactive]}>
+              <View style={[styles.shieldInnerCircle, isActive ? styles.shieldCircleActive : styles.shieldCircleInactive]}>
+                <Text style={styles.shieldEmoji}>{isActive ? '🛡️' : '⚠️'}</Text>
+              </View>
+            </View>
           </View>
 
           <Text style={styles.statusFooterText}>
             {isActive
-              ? `Real-time call screening active • ${guardians.length} Guardians on standby`
+              ? `Real-time call screening active • ${guardians.length} Guardian(s) on standby`
               : 'Incoming unknown calls will not trigger SMS alerts'}
           </Text>
         </View>
 
         {/* Quick Simulator Bar */}
-        <View style={styles.simulatorCard}>
+        <View style={styles.cardBox}>
           <Text style={styles.sectionTitle}>🧪 Live Call Simulation</Text>
           <Text style={styles.sectionSubtitle}>
             Test how StopFrauda responds to incoming calls:
@@ -222,18 +243,20 @@ export default function DashboardScreen() {
         </View>
 
         {/* Emergency Guardians List */}
-        <View style={styles.sectionBox}>
+        <View style={styles.cardBox}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>👨‍👩‍👧‍👦 Active Emergency Guardians</Text>
-            <Text style={styles.badgeCount}>{guardians.length}/5</Text>
+            <Text style={styles.sectionTitle}>👨‍👩‍👧‍👦 Emergency Guardians</Text>
+            <View style={styles.badgeCountBox}>
+              <Text style={styles.badgeCountText}>{guardians.length}/5</Text>
+            </View>
           </View>
 
           {guardians.length === 0 ? (
-            <Text style={styles.emptyText}>No emergency guardians selected.</Text>
+            <Text style={styles.emptyText}>No emergency guardians designated.</Text>
           ) : (
             guardians.map((g, idx) => (
               <View key={idx} style={styles.guardianRow}>
-                <View style={styles.guardianAvatar}>
+                <View style={[styles.guardianAvatar, { backgroundColor: getInitialColor(idx) }]}>
                   <Text style={styles.guardianInitial}>
                     {g.name.charAt(0).toUpperCase()}
                   </Text>
@@ -251,7 +274,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Recent Screened Calls Preview */}
-        <View style={styles.sectionBox}>
+        <View style={styles.cardBox}>
           <Text style={styles.sectionTitle}>📞 Recent Call Screenings</Text>
 
           {recentCalls.length === 0 ? (
@@ -270,7 +293,8 @@ export default function DashboardScreen() {
                     {new Date(c.timestamp).toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
-                    })} • {c.isUnknown ? 'Unknown (SMS Alert Sent)' : 'Known Contact'}
+                    })}{' '}
+                    • {c.isUnknown ? 'Unknown (Alert Sent)' : 'Known Contact'}
                   </Text>
                 </View>
               </View>
@@ -285,32 +309,32 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 30,
+    paddingBottom: 24,
   },
   alertBanner: {
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     marginBottom: 16,
     borderWidth: 1,
   },
   alertUnknown: {
-    backgroundColor: '#7F1D1D30',
-    borderColor: '#EF4444',
+    backgroundColor: Colors.dangerLight,
+    borderColor: '#FECACA',
   },
   alertSafe: {
-    backgroundColor: '#064E3B30',
-    borderColor: '#10B981',
+    backgroundColor: Colors.successLight,
+    borderColor: '#BBF7D0',
   },
   alertBannerHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
   alertEmoji: {
-    fontSize: 24,
+    fontSize: 22,
     marginRight: 10,
   },
   alertTextContainer: {
@@ -319,32 +343,48 @@ const styles = StyleSheet.create({
   alertBannerTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#F8FAFC',
     marginBottom: 2,
+  },
+  alertUnknownTitle: {
+    color: Colors.dangerDark,
+  },
+  alertSafeTitle: {
+    color: Colors.successDark,
   },
   alertBannerDesc: {
     fontSize: 12,
-    color: '#E2E8F0',
     lineHeight: 16,
+  },
+  alertUnknownDesc: {
+    color: Colors.dangerDark,
+  },
+  alertSafeDesc: {
+    color: Colors.successDark,
   },
   alertDismiss: {
     fontSize: 16,
-    color: '#94A3B8',
+    color: Colors.textMuted,
     padding: 4,
   },
   statusCard: {
     borderRadius: 20,
     padding: 20,
-    borderWidth: 2,
+    borderWidth: 1.5,
     marginBottom: 16,
+    backgroundColor: Colors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statusActive: {
-    backgroundColor: '#0F2847',
-    borderColor: '#38BDF8',
+    borderColor: Colors.primary,
+    backgroundColor: '#FAF5FF',
   },
   statusInactive: {
-    backgroundColor: '#1E293B',
-    borderColor: '#64748B',
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
   },
   statusHeaderRow: {
     flexDirection: 'row',
@@ -354,46 +394,77 @@ const styles = StyleSheet.create({
   statusLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#38BDF8',
-    letterSpacing: 1.5,
+    color: Colors.primary,
+    letterSpacing: 1.2,
   },
   statusTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
     marginTop: 2,
   },
   shieldGraphic: {
     alignItems: 'center',
     marginVertical: 14,
   },
+  shieldOuterRing: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shieldRingActive: {
+    backgroundColor: Colors.primaryLight,
+  },
+  shieldRingInactive: {
+    backgroundColor: Colors.surfaceSecondary,
+  },
+  shieldInnerCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shieldCircleActive: {
+    backgroundColor: Colors.primary,
+  },
+  shieldCircleInactive: {
+    backgroundColor: Colors.textMuted,
+  },
   shieldEmoji: {
-    fontSize: 64,
+    fontSize: 34,
   },
   statusFooterText: {
-    fontSize: 12,
-    color: '#CBD5E1',
+    fontSize: 13,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
-  simulatorCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
+  cardBox: {
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: Colors.border,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#F8FAFC',
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.textPrimary,
     marginBottom: 4,
   },
   sectionSubtitle: {
-    fontSize: 12,
-    color: '#94A3B8',
-    marginBottom: 10,
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginBottom: 12,
   },
   simButtonsRow: {
     flexDirection: 'row',
@@ -402,27 +473,24 @@ const styles = StyleSheet.create({
   simButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   simButtonUnknown: {
-    backgroundColor: '#DC2626',
+    backgroundColor: Colors.danger,
   },
   simButtonSafe: {
-    backgroundColor: '#059669',
+    backgroundColor: Colors.success,
   },
   simButtonText: {
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
-  },
-  sectionBox: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#334155',
-    marginBottom: 16,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -430,87 +498,88 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  badgeCount: {
+  badgeCountBox: {
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  badgeCountText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#38BDF8',
-    backgroundColor: '#0284C720',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    color: Colors.primary,
   },
   guardianRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: Colors.borderLight,
   },
   guardianAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#0284C7',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 12,
   },
   guardianInitial: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 15,
   },
   guardianInfo: {
     flex: 1,
   },
   guardianName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#F8FAFC',
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
   guardianPhone: {
-    fontSize: 12,
-    color: '#94A3B8',
+    fontSize: 13,
+    color: Colors.textSecondary,
   },
   verifiedTag: {
-    backgroundColor: '#064E3B',
+    backgroundColor: Colors.successLight,
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   verifiedText: {
-    color: '#34D399',
+    color: Colors.successDark,
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   callRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: Colors.borderLight,
   },
   callEmoji: {
     fontSize: 20,
-    marginRight: 10,
+    marginRight: 12,
   },
   callInfo: {
     flex: 1,
   },
   callNumber: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#F8FAFC',
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
   callTime: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
     marginTop: 2,
   },
   emptyText: {
-    color: '#64748B',
+    color: Colors.textMuted,
     fontSize: 13,
     textAlign: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
 });

@@ -14,6 +14,35 @@ import { useRouter } from 'expo-router';
 import * as Contacts from 'expo-contacts';
 import { EmergencyContact } from '../types';
 import { saveLocalContacts, getLocalContacts } from '../services/storage';
+import { Colors } from '../constants/theme';
+
+const AVATAR_COLORS = [
+  '#EC4899', // Pink
+  '#EF4444', // Red
+  '#3B82F6', // Blue
+  '#8B5CF6', // Purple
+  '#10B981', // Emerald
+  '#F59E0B', // Amber
+  '#06B6D4', // Cyan
+];
+
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[index];
+}
+
+function getInitials(name: string): string {
+  if (!name) return '??';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
 
 export default function ContactPickerScreen() {
   const router = useRouter();
@@ -37,37 +66,41 @@ export default function ContactPickerScreen() {
           sort: Contacts.SortTypes.FirstName,
         });
 
-        // Filter contacts that actually have a phone number
         const validContacts = data.filter(
           (c) => c.phoneNumbers && c.phoneNumbers.length > 0 && c.name
         );
         setPhonebookContacts(validContacts);
 
-        // Pre-fill previously saved contacts if any
         const saved = await getLocalContacts();
         if (saved && saved.length > 0) {
           setSelectedContacts(saved);
         }
       } else {
-        // Fallback sample contacts for simulator/mock
+        // Fallback sample contacts for web / simulator
         setPhonebookContacts([
           {
             id: 'c1',
-            name: 'Mom (Family)',
+            name: 'Irina Bazic - Revulet',
             contactType: Contacts.ContactType.Person,
-            phoneNumbers: [{ number: '+1 555-0199', label: 'mobile' }],
+            phoneNumbers: [{ number: '+373 780 15011', label: 'mobile' }],
           },
           {
             id: 'c2',
-            name: 'Dad (Family)',
+            name: 'Mom (Family)',
             contactType: Contacts.ContactType.Person,
-            phoneNumbers: [{ number: '+1 555-0188', label: 'mobile' }],
+            phoneNumbers: [{ number: '060946444', label: 'mobile' }],
           },
           {
             id: 'c3',
+            name: 'Dad (Family)',
+            contactType: Contacts.ContactType.Person,
+            phoneNumbers: [{ number: '061034633', label: 'mobile' }],
+          },
+          {
+            id: 'c4',
             name: 'Sister Sarah',
             contactType: Contacts.ContactType.Person,
-            phoneNumbers: [{ number: '+1 555-0177', label: 'mobile' }],
+            phoneNumbers: [{ number: '+1 (555) 019-2834', label: 'mobile' }],
           },
         ]);
       }
@@ -115,12 +148,6 @@ export default function ContactPickerScreen() {
     }
   };
 
-  const updateContactEmail = (phone: string, email: string) => {
-    setSelectedContacts(
-      selectedContacts.map((c) => (c.phone === phone ? { ...c, email } : c))
-    );
-  };
-
   const handleSkip = async () => {
     await saveLocalContacts([]);
     router.push('/paywall');
@@ -142,18 +169,25 @@ export default function ContactPickerScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Step Header */}
+      {/* Top Header Row */}
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          style={styles.backCircle}
+          activeOpacity={0.7}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backArrow}>←</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSkip}>
+          <Text style={styles.skipLink}>Skip for now →</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Title & Subtitle */}
       <View style={styles.header}>
-        <View style={styles.badgeRow}>
-          <Text style={styles.stepBadge}>STEP 3 OF 5</Text>
-          <TouchableOpacity onPress={handleSkip}>
-            <Text style={styles.skipHeaderText}>Skip for now →</Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.title}>Emergency Guardians</Text>
+        <Text style={styles.title}>Emergency Contacts</Text>
         <Text style={styles.subtitle}>
-          Select up to 5 trusted contacts from your device address book. Manual entry is
-          disabled to ensure genuine contacts.
+          Who should we alert if a scam is detected?
         </Text>
 
         {/* Search Bar */}
@@ -161,26 +195,44 @@ export default function ContactPickerScreen() {
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search address book..."
-            placeholderTextColor="#64748B"
+            placeholder="Search your contacts..."
+            placeholderTextColor={Colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Text style={styles.clearSearch}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Info Banner */}
+        <View style={styles.infoBanner}>
+          <Text style={styles.infoIcon}>ℹ️</Text>
+          <Text style={styles.infoText}>
+            Only contacts already in your phone can be added
+          </Text>
+          <TouchableOpacity onPress={loadContacts}>
+            <Text style={styles.refreshIcon}>🔄</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Selected Guardians Pills */}
+      {/* Selected Guardians Horizontal Pills (if any) */}
       {selectedContacts.length > 0 && (
-        <View style={styles.selectedContainer}>
-          <Text style={styles.selectedSectionTitle}>Designated Guardians:</Text>
+        <View style={styles.selectedRow}>
+          <Text style={styles.selectedCountBadge}>
+            Selected ({selectedContacts.length}/5):
+          </Text>
           <FlatList
             data={selectedContacts}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.phone}
             renderItem={({ item }) => (
-              <View style={styles.pill}>
-                <Text style={styles.pillText}>{item.name}</Text>
+              <View style={styles.guardianPill}>
+                <Text style={styles.guardianPillText}>{item.name}</Text>
                 <TouchableOpacity
                   onPress={() =>
                     setSelectedContacts(
@@ -188,85 +240,113 @@ export default function ContactPickerScreen() {
                     )
                   }
                 >
-                  <Text style={styles.pillRemove}>✕</Text>
+                  <Text style={styles.guardianPillRemove}>✕</Text>
                 </TouchableOpacity>
               </View>
             )}
-            contentContainerStyle={styles.pillList}
+            contentContainerStyle={styles.guardianPillList}
           />
         </View>
       )}
 
       {/* Contact List */}
       {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#38BDF8" />
-          <Text style={styles.loadingText}>Reading address book...</Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading contacts from phone...</Text>
         </View>
       ) : (
         <FlatList
           data={filteredContacts}
-          keyExtractor={(item) => item.id || item.name}
+          keyExtractor={(item) => item.id || item.name || Math.random().toString()}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyEmoji}>👥</Text>
+              <Text style={styles.emptyText}>No contacts found</Text>
+              <Text style={styles.emptySubtext}>
+                Make sure contacts permission is granted in Settings.
+              </Text>
+            </View>
+          }
           renderItem={({ item }) => {
-            const rawPhone = item.phoneNumbers?.[0]?.number || '';
-            const cleanPhone = rawPhone.replace(/\s+/g, '');
+            const phone = item.phoneNumbers?.[0]?.number || '';
+            const clean = phone.replace(/\s+/g, '');
             const isSelected = selectedContacts.some(
-              (c) => c.phone === cleanPhone || c.name === item.name
+              (c) => c.phone === clean || c.name === item.name
             );
+            const avatarColor = getAvatarColor(item.name || 'Contact');
+            const initials = getInitials(item.name || 'Contact');
 
             return (
               <TouchableOpacity
-                style={[styles.contactRow, isSelected && styles.contactRowSelected]}
+                style={[styles.contactCard, isSelected && styles.contactCardSelected]}
                 activeOpacity={0.7}
                 onPress={() => toggleSelectContact(item)}
               >
-                <View style={styles.avatarCircle}>
-                  <Text style={styles.avatarInitial}>
-                    {item.name ? item.name.charAt(0).toUpperCase() : '?'}
-                  </Text>
+                {/* Colored Avatar */}
+                <View style={[styles.avatarCircle, { backgroundColor: avatarColor }]}>
+                  <Text style={styles.avatarText}>{initials}</Text>
                 </View>
 
+                {/* Name & Phone */}
                 <View style={styles.contactDetails}>
-                  <Text style={styles.contactName}>{item.name}</Text>
-                  <Text style={styles.contactPhone}>{rawPhone}</Text>
+                  <Text style={styles.contactName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.contactPhone}>{phone}</Text>
                 </View>
 
+                {/* Circular Radio Checkbox */}
                 <View
                   style={[
-                    styles.checkbox,
-                    isSelected && styles.checkboxSelected,
+                    styles.radioCircle,
+                    isSelected ? styles.radioSelected : styles.radioUnselected,
                   ]}
                 >
-                  {isSelected && <Text style={styles.checkmark}>✓</Text>}
+                  {isSelected && <Text style={styles.radioCheck}>✓</Text>}
                 </View>
               </TouchableOpacity>
             );
           }}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No matching contacts found.</Text>
-            </View>
-          }
         />
       )}
 
-      {/* Footer Button */}
-      <View style={styles.footer}>
+      {/* Bottom Sticky Action Footer */}
+      <View style={styles.footerContainer}>
+        {selectedContacts.length === 0 && (
+          <Text style={styles.hintNotice}>
+            Select at least 1 contact (or skip to proceed)
+          </Text>
+        )}
+
         <TouchableOpacity
           style={[
             styles.continueButton,
-            selectedContacts.length === 0 && styles.skipFooterButton,
+            selectedContacts.length === 0 && styles.continueButtonSecondary,
           ]}
-          activeOpacity={0.8}
-          onPress={selectedContacts.length > 0 ? handleContinue : handleSkip}
+          activeOpacity={0.85}
+          onPress={handleContinue}
         >
-          <Text style={styles.continueButtonText}>
+          <Text
+            style={[
+              styles.continueButtonText,
+              selectedContacts.length === 0 && styles.continueButtonTextSecondary,
+            ]}
+          >
             {selectedContacts.length > 0
               ? `Continue with ${selectedContacts.length} Guardian(s)`
               : 'Skip & Continue without Guardians'}
           </Text>
-          <Text style={styles.arrowIcon}>→</Text>
+          <Text
+            style={[
+              styles.continueButtonArrow,
+              selectedContacts.length === 0 && styles.continueButtonTextSecondary,
+            ]}
+          >
+            →
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -276,224 +356,290 @@ export default function ContactPickerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 10,
-  },
-  badgeRow: {
+  topHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
-  stepBadge: {
-    color: '#38BDF8',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
+  backCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  countBadge: {
-    color: '#10B981',
-    fontSize: 12,
+  backArrow: {
+    fontSize: 20,
+    color: Colors.textPrimary,
     fontWeight: '700',
-    backgroundColor: '#064E3B40',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+  },
+  skipLink: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
-    color: '#F8FAFC',
-    marginBottom: 6,
+    color: Colors.textPrimary,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 13,
-    color: '#94A3B8',
-    lineHeight: 18,
-    marginBottom: 12,
+    fontSize: 15,
+    color: Colors.textSecondary,
+    marginBottom: 14,
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: Colors.border,
+    marginBottom: 10,
   },
   searchIcon: {
     fontSize: 16,
-    marginRight: 10,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: '#F8FAFC',
     fontSize: 15,
+    color: Colors.textPrimary,
   },
-  selectedContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    backgroundColor: '#1E293B40',
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+  clearSearch: {
+    fontSize: 16,
+    color: Colors.textMuted,
+    paddingHorizontal: 6,
   },
-  selectedSectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#38BDF8',
-    marginBottom: 6,
-  },
-  pillList: {
-    gap: 8,
-  },
-  pill: {
+  infoBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0284C7',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#E0E7FF',
+  },
+  infoIcon: {
+    fontSize: 16,
     marginRight: 8,
   },
-  pillText: {
-    color: '#FFFFFF',
+  infoText: {
+    flex: 1,
     fontSize: 13,
+    color: Colors.primary,
     fontWeight: '600',
+  },
+  refreshIcon: {
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  selectedRow: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
+  selectedCountBadge: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primary,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  guardianPillList: {
+    gap: 8,
+  },
+  guardianPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: Colors.primaryMuted,
+    marginRight: 8,
+  },
+  guardianPillText: {
+    color: Colors.primary,
+    fontSize: 13,
+    fontWeight: '700',
     marginRight: 6,
   },
-  pillRemove: {
-    color: '#E0F2FE',
+  guardianPillRemove: {
+    color: Colors.primary,
     fontSize: 12,
     fontWeight: '800',
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingBottom: 16,
   },
-  contactRow: {
+  contactCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  contactRowSelected: {
-    borderColor: '#38BDF8',
-    backgroundColor: '#0F2847',
+  contactCardSelected: {
+    borderColor: Colors.primary,
+    backgroundColor: '#F5F7FF',
   },
   avatarCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#334155',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
-  avatarInitial: {
-    color: '#38BDF8',
+  avatarText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   contactDetails: {
     flex: 1,
   },
   contactName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#F8FAFC',
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 3,
   },
   contactPhone: {
     fontSize: 13,
-    color: '#94A3B8',
-    marginTop: 2,
+    color: Colors.textSecondary,
   },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#64748B',
+  radioCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 10,
   },
-  checkboxSelected: {
-    backgroundColor: '#38BDF8',
-    borderColor: '#38BDF8',
+  radioUnselected: {
+    borderWidth: 2,
+    borderColor: Colors.border,
+    backgroundColor: 'transparent',
   },
-  checkmark: {
-    color: '#0F172A',
+  radioSelected: {
+    backgroundColor: Colors.primary,
+    borderWidth: 0,
+  },
+  radioCheck: {
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '800',
   },
-  centered: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: '#94A3B8',
+    marginTop: 12,
+    color: Colors.textSecondary,
     fontSize: 14,
-    marginTop: 10,
   },
   emptyContainer: {
-    padding: 40,
     alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 12,
   },
   emptyText: {
-    color: '#64748B',
-    fontSize: 14,
+    fontSize: 17,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
-  footer: {
-    padding: 20,
+  emptySubtext: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 4,
+    paddingHorizontal: 20,
+  },
+  footerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+    backgroundColor: Colors.background,
     borderTopWidth: 1,
-    borderTopColor: '#1E293B',
+    borderTopColor: Colors.border,
+  },
+  hintNotice: {
+    fontSize: 13,
+    color: Colors.danger,
+    textAlign: 'center',
+    marginBottom: 8,
+    fontWeight: '600',
   },
   continueButton: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 16,
-    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0284C7',
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 6,
   },
-  continueButtonDisabled: {
-    backgroundColor: '#334155',
-  },
-  skipFooterButton: {
-    backgroundColor: '#1E293B',
+  continueButtonSecondary: {
+    backgroundColor: Colors.surfaceSecondary,
     borderWidth: 1,
-    borderColor: '#475569',
-    shadowOpacity: 0.1,
-  },
-  skipHeaderText: {
-    color: '#38BDF8',
-    fontSize: 12,
-    fontWeight: '700',
-    textDecorationLine: 'underline',
+    borderColor: Colors.border,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   continueButtonText: {
-    color: '#FFFFFF',
+    color: Colors.textInverse,
     fontSize: 16,
     fontWeight: '700',
     marginRight: 8,
   },
-  arrowIcon: {
-    color: '#FFFFFF',
-    fontSize: 18,
+  continueButtonTextSecondary: {
+    color: Colors.textSecondary,
+  },
+  continueButtonArrow: {
+    color: Colors.textInverse,
+    fontSize: 20,
     fontWeight: '700',
   },
 });

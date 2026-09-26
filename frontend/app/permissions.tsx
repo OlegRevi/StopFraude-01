@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,139 +12,166 @@ import {
 import { useRouter } from 'expo-router';
 import * as Contacts from 'expo-contacts';
 import * as Notifications from 'expo-notifications';
+import { Colors } from '../constants/theme';
 
 export default function PermissionsScreen() {
   const router = useRouter();
 
   const [contactsGranted, setContactsGranted] = useState(false);
+  const [phoneGranted, setPhoneGranted] = useState(true); // Default true for simulation/OS
   const [notificationsGranted, setNotificationsGranted] = useState(false);
-  const [callScreeningGranted, setCallScreeningGranted] = useState(false);
-  const [phoneStateGranted, setPhoneStateGranted] = useState(false);
 
-  const requestAllPermissions = async () => {
+  useEffect(() => {
+    checkInitialPermissions();
+  }, []);
+
+  const checkInitialPermissions = async () => {
     try {
-      // 1. Request Contacts Permission
-      const contactsRes = await Contacts.requestPermissionsAsync();
+      const contactsRes = await Contacts.getPermissionsAsync();
       setContactsGranted(contactsRes.status === 'granted');
 
-      // 2. Request Notifications Permission
-      const notifRes = await Notifications.requestPermissionsAsync();
+      const notifRes = await Notifications.getPermissionsAsync();
       setNotificationsGranted(notifRes.status === 'granted');
+    } catch {
+      // Default initial states
+    }
+  };
 
-      // 3. Android Telephony / Call Screening
-      if (Platform.OS === 'android') {
-        setPhoneStateGranted(true);
-        setCallScreeningGranted(true);
-      } else {
-        setPhoneStateGranted(true);
-        setCallScreeningGranted(true);
+  const handleRequestContacts = async () => {
+    try {
+      const res = await Contacts.requestPermissionsAsync();
+      setContactsGranted(res.status === 'granted');
+    } catch {
+      setContactsGranted(true);
+    }
+  };
+
+  const handleRequestNotifications = async () => {
+    try {
+      const res = await Notifications.requestPermissionsAsync();
+      setNotificationsGranted(res.status === 'granted');
+    } catch {
+      setNotificationsGranted(true);
+    }
+  };
+
+  const handleContinue = async () => {
+    try {
+      if (!contactsGranted) {
+        const res = await Contacts.requestPermissionsAsync();
+        setContactsGranted(res.status === 'granted');
       }
-
+      if (!notificationsGranted) {
+        const res = await Notifications.requestPermissionsAsync();
+        setNotificationsGranted(res.status === 'granted');
+      }
+    } catch (e) {
+      console.warn('Permissions request handled:', e);
+    } finally {
       // Navigate to Step 3: Choose Emergency Contacts
       router.push('/contact-picker');
-    } catch (e: any) {
-      Alert.alert('Permission Request', 'Please grant the requested permissions to enable active call protection.');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Top Header with Back Button */}
+        <View style={styles.topNav}>
+          <TouchableOpacity
+            style={styles.backCircle}
+            activeOpacity={0.7}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Center Key Icon Badge */}
+        <View style={styles.keyBadgeContainer}>
+          <View style={styles.keyCircle}>
+            <Text style={styles.keyEmoji}>🔑</Text>
+          </View>
+        </View>
+
+        {/* Title & Subtitle */}
         <View style={styles.header}>
-          <Text style={styles.badge}>STEP 2 OF 5</Text>
-          <Text style={styles.title}>System Permissions</Text>
+          <Text style={styles.title}>We Need Your Permission</Text>
           <Text style={styles.description}>
-            To protect you from scam calls, Android requires permission to inspect incoming
-            numbers against your contacts. StopFrauda never records or listens to your calls.
+            To protect you from scams, we need access to:
           </Text>
         </View>
 
-        {/* Permissions Cards */}
+        {/* Permissions Cards List */}
         <View style={styles.cardsList}>
           {/* Card 1: Contacts */}
-          <View style={[styles.card, contactsGranted && styles.cardGranted]}>
-            <View style={styles.cardIconBox}>
-              <Text style={styles.cardEmoji}>📖</Text>
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.8}
+            onPress={handleRequestContacts}
+          >
+            <View style={styles.cardLeftIcon}>
+              <Text style={styles.cardEmoji}>👥</Text>
             </View>
-            <View style={styles.cardText}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}>Read Contacts</Text>
-                <Text style={styles.requiredBadge}>CRITICAL</Text>
-              </View>
+            <View style={styles.cardTextContainer}>
+              <Text style={styles.cardTitle}>Contacts</Text>
               <Text style={styles.cardSubtitle}>
-                Allows StopFrauda to check whether an incoming caller is already a recognized friend or family member.
+                To select emergency contacts from your phone
               </Text>
             </View>
-          </View>
+            <View style={[styles.statusBadge, contactsGranted ? styles.statusGranted : styles.statusPending]}>
+              <Text style={[styles.statusCheck, contactsGranted && styles.statusCheckActive]}>✓</Text>
+            </View>
+          </TouchableOpacity>
 
-          {/* Card 2: Call Screening & State */}
-          <View style={[styles.card, callScreeningGranted && styles.cardGranted]}>
-            <View style={styles.cardIconBox}>
+          {/* Card 2: Phone */}
+          <View style={styles.card}>
+            <View style={styles.cardLeftIcon}>
               <Text style={styles.cardEmoji}>📞</Text>
             </View>
-            <View style={styles.cardText}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}>Call Screening Service</Text>
-                <Text style={styles.requiredBadge}>CRITICAL</Text>
-              </View>
+            <View style={styles.cardTextContainer}>
+              <Text style={styles.cardTitle}>Phone</Text>
               <Text style={styles.cardSubtitle}>
-                Enables OS-level interception of incoming calls to detect unknown callers before your phone rings.
+                To detect incoming calls in real-time
               </Text>
+            </View>
+            <View style={[styles.statusBadge, phoneGranted ? styles.statusGranted : styles.statusPending]}>
+              <Text style={[styles.statusCheck, phoneGranted && styles.statusCheckActive]}>✓</Text>
             </View>
           </View>
 
           {/* Card 3: Notifications */}
-          <View style={[styles.card, notificationsGranted && styles.cardGranted]}>
-            <View style={styles.cardIconBox}>
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.8}
+            onPress={handleRequestNotifications}
+          >
+            <View style={styles.cardLeftIcon}>
               <Text style={styles.cardEmoji}>🔔</Text>
             </View>
-            <View style={styles.cardText}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}>Emergency Notifications</Text>
-                <Text style={styles.optionalBadge}>RECOMMENDED</Text>
-              </View>
+            <View style={styles.cardTextContainer}>
+              <Text style={styles.cardTitle}>Notifications</Text>
               <Text style={styles.cardSubtitle}>
-                Displays heads-up warning alerts and confirms when emergency SMS warnings have been sent to your guardians.
+                To alert you when an unknown call is detected
               </Text>
             </View>
-          </View>
-
-          {/* Card 4: Foreground Protection */}
-          <View style={styles.card}>
-            <View style={styles.cardIconBox}>
-              <Text style={styles.cardEmoji}>🛡️</Text>
+            <View style={[styles.statusBadge, notificationsGranted ? styles.statusGranted : styles.statusPending]}>
+              <Text style={[styles.statusCheck, notificationsGranted && styles.statusCheckActive]}>✓</Text>
             </View>
-            <View style={styles.cardText}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}>24/7 Background Shield</Text>
-                <Text style={styles.requiredBadge}>AUTOMATIC</Text>
-              </View>
-              <Text style={styles.cardSubtitle}>
-                Keeps StopFrauda's detection active even when the app is minimized or phone is locked.
-              </Text>
-            </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
-        {/* Privacy Promise */}
-        <View style={styles.privacyBox}>
-          <Text style={styles.privacyTitle}>🔒 Our Privacy Guarantee</Text>
-          <Text style={styles.privacyText}>
-            We never store your contacts on cloud servers, and we never access call audio.
-            Number matching occurs directly on your device.
-          </Text>
+        {/* Bottom CTA */}
+        <View style={styles.footerContainer}>
+          <TouchableOpacity
+            style={styles.continueButton}
+            activeOpacity={0.85}
+            onPress={handleContinue}
+          >
+            <Text style={styles.continueButtonText}>Continue</Text>
+            <Text style={styles.continueButtonArrow}>→</Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Continue Button */}
-        <TouchableOpacity
-          style={styles.continueButton}
-          activeOpacity={0.8}
-          onPress={requestAllPermissions}
-        >
-          <Text style={styles.continueButtonText}>Grant Permissions & Continue</Text>
-          <Text style={styles.continueButtonArrow}>→</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -153,142 +180,164 @@ export default function PermissionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    justifyContent: 'space-between',
+  },
+  topNav: {
+    paddingTop: 8,
+    marginBottom: 8,
+  },
+  backCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  backArrow: {
+    fontSize: 20,
+    color: Colors.textPrimary,
+    fontWeight: '700',
+  },
+  keyBadgeContainer: {
+    alignItems: 'center',
+    marginVertical: 12,
+  },
+  keyCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  keyEmoji: {
+    fontSize: 38,
   },
   header: {
-    marginBottom: 20,
-  },
-  badge: {
-    color: '#38BDF8',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
-    marginBottom: 6,
+    alignItems: 'center',
+    marginBottom: 24,
   },
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
+    textAlign: 'center',
     marginBottom: 8,
   },
   description: {
-    fontSize: 14,
-    color: '#94A3B8',
-    lineHeight: 20,
+    fontSize: 15,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   cardsList: {
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#1E293B',
-    borderRadius: 14,
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#334155',
-    alignItems: 'flex-start',
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  cardGranted: {
-    borderColor: '#10B981',
-    backgroundColor: '#064E3B20',
-  },
-  cardIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: '#0F172A',
+  cardLeftIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.successLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
-    borderWidth: 1,
-    borderColor: '#334155',
   },
   cardEmoji: {
     fontSize: 22,
   },
-  cardText: {
+  cardTextContainer: {
     flex: 1,
-  },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#F1F5F9',
-  },
-  requiredBadge: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#EF4444',
-    backgroundColor: '#7F1D1D40',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  optionalBadge: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#38BDF8',
-    backgroundColor: '#0369A140',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
+    color: Colors.textPrimary,
+    marginBottom: 3,
   },
   cardSubtitle: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
     lineHeight: 18,
   },
-  privacyBox: {
-    backgroundColor: '#1E293B80',
-    borderRadius: 12,
-    padding: 14,
+  statusBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  statusGranted: {
+    backgroundColor: Colors.successLight,
+  },
+  statusPending: {
+    backgroundColor: Colors.surfaceSecondary,
     borderWidth: 1,
-    borderColor: '#334155',
-    marginBottom: 24,
+    borderColor: Colors.border,
   },
-  privacyTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#38BDF8',
-    marginBottom: 4,
+  statusCheck: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.textMuted,
   },
-  privacyText: {
-    fontSize: 12,
-    color: '#94A3B8',
-    lineHeight: 16,
+  statusCheckActive: {
+    color: Colors.success,
+  },
+  footerContainer: {
+    marginTop: 'auto',
+    paddingTop: 16,
   },
   continueButton: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 16,
-    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0284C7',
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 6,
   },
   continueButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: Colors.textInverse,
+    fontSize: 17,
     fontWeight: '700',
     marginRight: 8,
   },
   continueButtonArrow: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: Colors.textInverse,
+    fontSize: 20,
     fontWeight: '700',
   },
 });

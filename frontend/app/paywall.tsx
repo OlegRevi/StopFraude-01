@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { ApiClient } from '../services/api';
 import { getOrCreateUserId, saveLocalSubscription } from '../services/storage';
 import { PlanType } from '../types';
+import { Colors } from '../constants/theme';
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -47,11 +48,28 @@ export default function PaywallScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Top Header Row with Back Button */}
+        <View style={styles.topHeader}>
+          <TouchableOpacity
+            style={styles.backCircle}
+            activeOpacity={0.7}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Center Star Badge */}
+        <View style={styles.badgeContainer}>
+          <View style={styles.badgeCircle}>
+            <Text style={styles.badgeEmoji}>⭐</Text>
+          </View>
+        </View>
+
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.stepBadge}>STEP 4 OF 5</Text>
-          <Text style={styles.title}>Choose Your Shield</Text>
+          <Text style={styles.title}>Choose Your Protection</Text>
           <Text style={styles.subtitle}>
             Activate comprehensive 24/7 scam protection with instant SMS alerts for your loved ones.
           </Text>
@@ -61,9 +79,9 @@ export default function PaywallScreen() {
         <View style={styles.earlyBirdPromo}>
           <Text style={styles.promoEmoji}>🎉</Text>
           <View style={styles.promoTextContainer}>
-            <Text style={styles.promoTitle}>Early Bird Special Active!</Text>
+            <Text style={styles.promoTitle}>Early Bird Special Active</Text>
             <Text style={styles.promoDesc}>
-              Sign up today and receive 1 full year of StopFrauda protection completely free (Valid until Nov 1).
+              1 full year of StopFrauda protection completely free!
             </Text>
           </View>
         </View>
@@ -117,7 +135,7 @@ export default function PaywallScreen() {
           >
             <View style={styles.planHeader}>
               <View>
-                <Text style={styles.standardBadge}>REGULAR</Text>
+                <Text style={styles.standardBadge}>STANDARD</Text>
                 <Text style={styles.planName}>Standard Annual</Text>
               </View>
               <View style={styles.priceContainer}>
@@ -133,7 +151,7 @@ export default function PaywallScreen() {
 
             <View style={styles.perksList}>
               <Text style={styles.perkItem}>✓ Full 24/7 background scam screening</Text>
-              <Text style={styles.perkItem}>✓ Unlimited Twilio emergency SMS dispatches</Text>
+              <Text style={styles.perkItem}>✓ Unlimited emergency SMS dispatches</Text>
               <Text style={styles.perkItem}>✓ Cancel anytime with one tap</Text>
             </View>
           </TouchableOpacity>
@@ -141,29 +159,31 @@ export default function PaywallScreen() {
 
         {/* Security / Stripe Trust */}
         <View style={styles.trustRow}>
-          <Text style={styles.trustText}>🔒 Encrypted & Secured by Stripe • No hidden fees</Text>
+          <Text style={styles.trustText}>🔒 Encrypted & Secured • No hidden fees</Text>
         </View>
 
         {/* Submit Button */}
-        <TouchableOpacity
-          style={styles.actionButton}
-          activeOpacity={0.8}
-          onPress={handleSelectPlan}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <>
-              <Text style={styles.actionButtonText}>
-                {selectedPlan === 'EARLY_BIRD'
-                  ? 'Claim 1 Year Free Protection'
-                  : 'Subscribe for $10.00 / year'}
-              </Text>
-              <Text style={styles.arrowIcon}>→</Text>
-            </>
-          )}
-        </TouchableOpacity>
+        <View style={styles.footerContainer}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            activeOpacity={0.85}
+            onPress={handleSelectPlan}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color={Colors.textInverse} />
+            ) : (
+              <>
+                <Text style={styles.actionButtonText}>
+                  {selectedPlan === 'EARLY_BIRD'
+                    ? 'Claim 1 Year Free Protection'
+                    : 'Subscribe for $10.00 / year'}
+                </Text>
+                <Text style={styles.arrowIcon}>→</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -172,42 +192,79 @@ export default function PaywallScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  topHeader: {
+    paddingTop: 8,
+    marginBottom: 4,
+  },
+  backCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  backArrow: {
+    fontSize: 20,
+    color: Colors.textPrimary,
+    fontWeight: '700',
+  },
+  badgeContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  badgeCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeEmoji: {
+    fontSize: 36,
   },
   header: {
+    alignItems: 'center',
     marginBottom: 16,
-  },
-  stepBadge: {
-    color: '#38BDF8',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
-    marginBottom: 4,
   },
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
+    textAlign: 'center',
     marginBottom: 6,
   },
   subtitle: {
-    fontSize: 13,
-    color: '#94A3B8',
-    lineHeight: 18,
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: 10,
   },
   earlyBirdPromo: {
     flexDirection: 'row',
-    backgroundColor: '#1E293B',
-    borderRadius: 14,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#F59E0B',
+    borderColor: Colors.primaryMuted,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 18,
   },
   promoEmoji: {
     fontSize: 28,
@@ -217,133 +274,143 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   promoTitle: {
-    color: '#F59E0B',
-    fontSize: 14,
-    fontWeight: '700',
+    color: Colors.primary,
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 2,
   },
   promoDesc: {
-    color: '#E2E8F0',
-    fontSize: 12,
-    marginTop: 2,
-    lineHeight: 16,
+    color: Colors.textSecondary,
+    fontSize: 13,
   },
   plansContainer: {
-    gap: 16,
-    marginBottom: 20,
+    gap: 14,
+    marginBottom: 16,
   },
   planCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
     padding: 18,
-    borderWidth: 2,
-    borderColor: '#334155',
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   planCardSelected: {
-    borderColor: '#38BDF8',
-    backgroundColor: '#0F2847',
+    borderColor: Colors.primary,
+    backgroundColor: '#F5F7FF',
   },
   planHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   badgeRow: {
     marginBottom: 4,
   },
   popularBadge: {
-    color: '#0F172A',
-    backgroundColor: '#38BDF8',
+    backgroundColor: Colors.primary,
+    color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '800',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     alignSelf: 'flex-start',
+    letterSpacing: 0.5,
   },
   standardBadge: {
-    color: '#94A3B8',
-    backgroundColor: '#334155',
+    backgroundColor: Colors.surfaceSecondary,
+    color: Colors.textSecondary,
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     alignSelf: 'flex-start',
     marginBottom: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   planName: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#F8FAFC',
+    fontWeight: '800',
+    color: Colors.textPrimary,
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
   },
   priceCurrency: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#38BDF8',
+    color: Colors.primary,
   },
   priceAmount: {
     fontSize: 32,
-    fontWeight: '800',
-    color: '#F8FAFC',
+    fontWeight: '900',
+    color: Colors.primary,
   },
   pricePeriod: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
     marginLeft: 2,
   },
   planSummary: {
     fontSize: 13,
-    color: '#94A3B8',
-    lineHeight: 18,
+    color: Colors.textSecondary,
     marginBottom: 12,
+    lineHeight: 18,
   },
   perksList: {
     gap: 6,
     borderTopWidth: 1,
-    borderTopColor: '#334155',
+    borderTopColor: Colors.borderLight,
     paddingTop: 10,
   },
   perkItem: {
     fontSize: 13,
-    color: '#CBD5E1',
+    color: Colors.textPrimary,
     fontWeight: '500',
   },
   trustRow: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginVertical: 10,
   },
   trustText: {
-    color: '#64748B',
+    color: Colors.textSecondary,
     fontSize: 12,
-    fontWeight: '600',
+  },
+  footerContainer: {
+    marginTop: 8,
+    paddingBottom: 16,
   },
   actionButton: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 16,
-    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0284C7',
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 6,
   },
   actionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: Colors.textInverse,
+    fontSize: 17,
     fontWeight: '700',
     marginRight: 8,
   },
   arrowIcon: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: Colors.textInverse,
+    fontSize: 20,
     fontWeight: '700',
   },
 });

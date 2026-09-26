@@ -6,9 +6,11 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { isOnboardingCompleted } from '../services/storage';
+import { Colors } from '../constants/theme';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -29,74 +31,82 @@ export default function WelcomeScreen() {
   if (checking) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#38BDF8" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Shield Graphic Badge */}
-        <View style={styles.badgeContainer}>
-          <View style={styles.iconCircle}>
-            <Text style={styles.iconEmoji}>🛡️</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Top Bar with Language Selector */}
+        <View style={styles.topBar}>
+          <View style={styles.langPill}>
+            <Text style={styles.langIcon}>🌐</Text>
+            <Text style={styles.langText}>EN</Text>
           </View>
         </View>
 
-        {/* Title & Core Value Proposition */}
-        <Text style={styles.appName}>StopFrauda</Text>
-        <Text style={styles.tagline}>
-          Never worry about phone scams again.
-        </Text>
-
-        {/* Feature Highlights */}
-        <View style={styles.featureList}>
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>⚡</Text>
-            <View style={styles.featureTextContainer}>
-              <Text style={styles.featureTitle}>OS-Level Call Screening</Text>
-              <Text style={styles.featureDesc}>
-                Intercepts unknown numbers instantly before fraud can happen.
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>👨‍👩‍👧‍👦</Text>
-            <View style={styles.featureTextContainer}>
-              <Text style={styles.featureTitle}>Family Emergency Guardians</Text>
-              <Text style={styles.featureDesc}>
-                Up to 5 trusted loved ones receive an immediate Twilio SMS alert.
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>🔒</Text>
-            <View style={styles.featureTextContainer}>
-              <Text style={styles.featureTitle}>100% Private & Secure</Text>
-              <Text style={styles.featureDesc}>
-                Zero call audio recording or transcription. Only contact matching.
-              </Text>
+        {/* Hero Concentric Shield Icon */}
+        <View style={styles.heroContainer}>
+          <View style={styles.outerCircle}>
+            <View style={styles.innerCircle}>
+              <Text style={styles.heroShield}>🛡️</Text>
             </View>
           </View>
         </View>
 
-        {/* Action Button */}
-        <TouchableOpacity
-          style={styles.primaryButton}
-          activeOpacity={0.8}
-          onPress={() => router.push('/permissions')}
-        >
-          <Text style={styles.primaryButtonText}>Activate Scam Shield</Text>
-          <Text style={styles.arrowIcon}>→</Text>
-        </TouchableOpacity>
+        {/* Main Title & Subtitle */}
+        <View style={styles.headerBox}>
+          <Text style={styles.appName}>StopFrauda</Text>
+          <Text style={styles.mainTitle}>
+            Protect Your Loved Ones From Phone Scams
+          </Text>
+          <Text style={styles.subtitle}>
+            AI-powered protection that alerts your family when suspicious calls are detected
+          </Text>
+        </View>
 
-        <Text style={styles.footnote}>
-          Early Bird Promotion: 1 Year Free for early signups!
-        </Text>
-      </View>
+        {/* Feature List Cards */}
+        <View style={styles.featureContainer}>
+          <View style={styles.featureRow}>
+            <View style={styles.featureBadge}>
+              <Text style={styles.badgeEmoji}>🛡️</Text>
+            </View>
+            <Text style={styles.featureText}>Detect scam calls automatically</Text>
+          </View>
+
+          <View style={styles.featureRow}>
+            <View style={styles.featureBadge}>
+              <Text style={styles.badgeEmoji}>🔔</Text>
+            </View>
+            <Text style={styles.featureText}>Alert family members instantly</Text>
+          </View>
+
+          <View style={styles.featureRow}>
+            <View style={styles.featureBadge}>
+              <Text style={styles.badgeEmoji}>🕒</Text>
+            </View>
+            <Text style={styles.featureText}>24/7 protection for loved ones</Text>
+          </View>
+        </View>
+
+        {/* Bottom CTA & Promotion */}
+        <View style={styles.footerContainer}>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            activeOpacity={0.85}
+            onPress={() => router.push('/permissions')}
+          >
+            <Text style={styles.primaryButtonText}>Get Started</Text>
+            <Text style={styles.arrowIcon}>→</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.promoText}>
+            🎉 Early Bird Special: 1 Year Free Protection Included!
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -104,136 +114,164 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingBottom: 24,
     justifyContent: 'space-between',
   },
-  badgeContainer: {
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 12,
+  },
+  langPill: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-  },
-  iconCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#1E293B',
-    borderWidth: 2,
-    borderColor: '#38BDF8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#38BDF8',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  iconEmoji: {
-    fontSize: 48,
-  },
-  tag: {
-    backgroundColor: '#1E293B',
+    backgroundColor: Colors.primaryLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#334155',
+    gap: 4,
   },
-  tagText: {
-    color: '#38BDF8',
-    fontSize: 11,
+  langIcon: {
+    fontSize: 14,
+  },
+  langText: {
+    color: Colors.primary,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 1,
+  },
+  heroContainer: {
+    alignItems: 'center',
+    marginVertical: 18,
+  },
+  outerCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  innerCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  heroShield: {
+    fontSize: 44,
+  },
+  headerBox: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   appName: {
-    fontSize: 36,
+    fontSize: 18,
     fontWeight: '800',
-    color: '#F8FAFC',
-    textAlign: 'center',
-    marginTop: 12,
+    color: Colors.primary,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: 6,
   },
-  tagline: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#E2E8F0',
+  mainTitle: {
+    fontSize: 27,
+    fontWeight: '800',
+    color: Colors.textPrimary,
     textAlign: 'center',
-    marginTop: 8,
+    lineHeight: 35,
+    marginBottom: 12,
   },
-  subtext: {
+  subtitle: {
     fontSize: 15,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
-    marginTop: 8,
+    paddingHorizontal: 12,
   },
-  featureList: {
-    marginVertical: 16,
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
-    padding: 16,
+  featureContainer: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: Colors.border,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  featureItem: {
+  featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
+    paddingVertical: 10,
   },
-  featureBullet: {
-    fontSize: 24,
+  featureBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 14,
   },
-  featureTextContainer: {
-    flex: 1,
+  badgeEmoji: {
+    fontSize: 20,
   },
-  featureTitle: {
+  featureText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#F1F5F9',
+    color: Colors.textPrimary,
+    flex: 1,
   },
-  featureDesc: {
-    fontSize: 13,
-    color: '#94A3B8',
-    marginTop: 2,
+  footerContainer: {
+    marginTop: 'auto',
   },
   primaryButton: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0284C7',
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 6,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: Colors.textInverse,
     fontSize: 17,
     fontWeight: '700',
     marginRight: 8,
   },
   arrowIcon: {
-    color: '#FFFFFF',
+    color: Colors.textInverse,
     fontSize: 20,
     fontWeight: '700',
   },
-  footnote: {
+  promoText: {
     fontSize: 12,
-    color: '#F59E0B',
+    color: Colors.primary,
     textAlign: 'center',
     fontWeight: '600',
-    marginTop: 10,
+    marginTop: 12,
   },
 });

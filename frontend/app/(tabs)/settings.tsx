@@ -21,6 +21,7 @@ import {
   setOnboardingCompleted,
 } from '../../services/storage';
 import { EmergencyContact, UserSubscription } from '../../types';
+import { Colors } from '../../constants/theme';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -79,7 +80,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Subscription Plan Card */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>💳 Protection Subscription</Text>
@@ -91,14 +92,17 @@ export default function SettingsScreen() {
                   : 'STANDARD ANNUAL ($10/YR)'}
               </Text>
             </View>
-            <Text style={styles.statusActiveText}>ACTIVE</Text>
+            <View style={styles.statusActiveBadge}>
+              <Text style={styles.statusActiveText}>ACTIVE</Text>
+            </View>
           </View>
 
           <Text style={styles.planDetailText}>
             Status: <Text style={styles.boldText}>{subscription?.status || 'active'}</Text>
           </Text>
           <Text style={styles.planDetailText}>
-            Renewal: <Text style={styles.boldText}>
+            Renewal:{' '}
+            <Text style={styles.boldText}>
               {subscription?.expiresAt
                 ? new Date(subscription.expiresAt).toLocaleDateString()
                 : '1 Year from activation'}
@@ -112,7 +116,7 @@ export default function SettingsScreen() {
 
           <View style={styles.settingRow}>
             <View style={styles.settingTextContainer}>
-              <Text style={styles.settingTitle}>Twilio Emergency SMS</Text>
+              <Text style={styles.settingTitle}>Emergency Guardian SMS</Text>
               <Text style={styles.settingSubtitle}>
                 Instantly alert emergency guardians when an unknown caller rings
               </Text>
@@ -120,14 +124,14 @@ export default function SettingsScreen() {
             <Switch
               value={smsAlertsEnabled}
               onValueChange={setSmsAlertsEnabled}
-              trackColor={{ false: '#334155', true: '#0284C7' }}
-              thumbColor={smsAlertsEnabled ? '#38BDF8' : '#94A3B8'}
+              trackColor={{ false: Colors.border, true: Colors.primary }}
+              thumbColor="#FFFFFF"
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingTextContainer}>
-              <Text style={styles.settingTitle}>Auto-Silence / Reject Unknowns</Text>
+              <Text style={styles.settingTitle}>Auto-Silence Unknowns</Text>
               <Text style={styles.settingSubtitle}>
                 Automatically disallow calls from numbers not registered in contacts
               </Text>
@@ -135,8 +139,8 @@ export default function SettingsScreen() {
             <Switch
               value={autoRejectCalls}
               onValueChange={handleToggleAutoReject}
-              trackColor={{ false: '#334155', true: '#DC2626' }}
-              thumbColor={autoRejectCalls ? '#EF4444' : '#94A3B8'}
+              trackColor={{ false: Colors.border, true: Colors.danger }}
+              thumbColor="#FFFFFF"
             />
           </View>
         </View>
@@ -150,12 +154,16 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
 
-          {guardians.map((g, idx) => (
-            <View key={idx} style={styles.guardianItem}>
-              <Text style={styles.guardianName}>• {g.name}</Text>
-              <Text style={styles.guardianPhone}>{g.phone}</Text>
-            </View>
-          ))}
+          {guardians.length === 0 ? (
+            <Text style={styles.emptyText}>No emergency guardians selected.</Text>
+          ) : (
+            guardians.map((g, idx) => (
+              <View key={idx} style={styles.guardianItem}>
+                <Text style={styles.guardianName}>• {g.name}</Text>
+                <Text style={styles.guardianPhone}>{g.phone}</Text>
+              </View>
+            ))
+          )}
         </View>
 
         {/* Cloud Run Backend URL Config */}
@@ -170,13 +178,13 @@ export default function SettingsScreen() {
             value={backendUrl}
             onChangeText={setBackendUrl}
             placeholder="https://stopfrauda-backend-xyz.run.app"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={Colors.textMuted}
             autoCapitalize="none"
           />
 
           <TouchableOpacity
             style={styles.saveUrlButton}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
             onPress={handleSaveBackendUrl}
           >
             <Text style={styles.saveUrlText}>Save Backend URL</Text>
@@ -199,7 +207,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
     padding: 16,
@@ -207,16 +215,21 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   sectionCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
   },
   sectionHeader: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#F8FAFC',
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.textPrimary,
     marginBottom: 10,
   },
   planBadgeRow: {
@@ -226,52 +239,58 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   planBadge: {
-    backgroundColor: '#0F2847',
+    backgroundColor: Colors.primaryLight,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#38BDF8',
+    borderColor: Colors.primaryMuted,
   },
   planBadgeText: {
-    color: '#38BDF8',
+    color: Colors.primary,
     fontSize: 11,
     fontWeight: '800',
   },
+  statusActiveBadge: {
+    backgroundColor: Colors.successLight,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
   statusActiveText: {
-    color: '#10B981',
+    color: Colors.successDark,
     fontWeight: '800',
-    fontSize: 12,
+    fontSize: 11,
   },
   planDetailText: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
     marginTop: 4,
   },
   boldText: {
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
     fontWeight: '700',
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: Colors.borderLight,
   },
   settingTextContainer: {
     flex: 1,
     marginRight: 12,
   },
   settingTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#F8FAFC',
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
   settingSubtitle: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
     marginTop: 2,
     lineHeight: 16,
   },
@@ -282,63 +301,68 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   editText: {
-    color: '#38BDF8',
+    color: Colors.primary,
     fontSize: 13,
     fontWeight: '700',
   },
   guardianItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#33415540',
+    borderBottomColor: Colors.borderLight,
   },
   guardianName: {
-    fontSize: 13,
-    color: '#E2E8F0',
+    fontSize: 14,
+    color: Colors.textPrimary,
     fontWeight: '600',
   },
   guardianPhone: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
+  },
+  emptyText: {
+    color: Colors.textMuted,
+    fontSize: 13,
+    paddingVertical: 8,
   },
   inputSubtitle: {
-    fontSize: 12,
-    color: '#94A3B8',
+    fontSize: 13,
+    color: Colors.textSecondary,
     marginBottom: 8,
   },
   urlInput: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
+    backgroundColor: Colors.surfaceSecondary,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: Colors.border,
     fontSize: 14,
     marginBottom: 10,
   },
   saveUrlButton: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: 'center',
   },
   saveUrlText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
   resetButton: {
-    backgroundColor: '#1E293B',
+    backgroundColor: Colors.dangerLight,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#EF4444',
+    borderColor: '#FECACA',
   },
   resetButtonText: {
-    color: '#EF4444',
+    color: Colors.danger,
     fontSize: 14,
     fontWeight: '700',
   },

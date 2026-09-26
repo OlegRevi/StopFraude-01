@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   SafeAreaView,
   FlatList,
-  Alert,
 } from 'react-native';
 import { getLocalCallLogs } from '../../services/storage';
 import { CallLogEntry } from '../../types';
+import { Colors } from '../../constants/theme';
 
 type FilterType = 'ALL' | 'UNKNOWN' | 'SAFE';
 
@@ -49,7 +49,7 @@ export default function HistoryScreen() {
               filter === 'ALL' && styles.filterTabTextActive,
             ]}
           >
-            All Calls ({logs.length})
+            All ({logs.length})
           </Text>
         </TouchableOpacity>
 
@@ -92,6 +92,7 @@ export default function HistoryScreen() {
         refreshing={refreshing}
         onRefresh={loadLogs}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View
             style={[
@@ -101,16 +102,28 @@ export default function HistoryScreen() {
           >
             <View style={styles.logCardHeader}>
               <View style={styles.logHeaderLeft}>
-                <Text style={styles.logEmoji}>
-                  {item.isUnknown ? '🚨' : '✅'}
-                </Text>
-                <View>
+                <View
+                  style={[
+                    styles.logIconCircle,
+                    item.isUnknown ? styles.iconUnknown : styles.iconSafe,
+                  ]}
+                >
+                  <Text style={styles.logEmoji}>
+                    {item.isUnknown ? '🚨' : '✅'}
+                  </Text>
+                </View>
+                <View style={styles.logTextContainer}>
                   <Text style={styles.logNumber}>
                     {item.callerName
                       ? `${item.callerName} (${item.incomingNumber})`
                       : item.incomingNumber}
                   </Text>
-                  <Text style={styles.logVerdict}>
+                  <Text
+                    style={[
+                      styles.logVerdict,
+                      item.isUnknown ? styles.verdictUnknown : styles.verdictSafe,
+                    ]}
+                  >
                     {item.isUnknown
                       ? 'UNKNOWN CALLER • NOT IN CONTACTS'
                       : 'VERIFIED CONTACT'}
@@ -130,8 +143,8 @@ export default function HistoryScreen() {
               <View style={styles.alertDetailBox}>
                 <Text style={styles.alertDetailText}>
                   {item.alertDispatched
-                    ? '⚡ Twilio SMS emergency alert dispatched to guardians'
-                    : 'Alert generated locally'}
+                    ? '⚡ Emergency SMS alert dispatched to guardians'
+                    : 'Alert recorded locally'}
                 </Text>
               </View>
             )}
@@ -154,108 +167,143 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: Colors.background,
   },
   filterRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 8,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: Colors.border,
   },
   filterTab: {
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: '#1E293B',
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: Colors.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   filterTabActive: {
-    backgroundColor: '#0284C7',
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primaryMuted,
   },
   filterTabText: {
-    color: '#94A3B8',
-    fontSize: 12,
+    color: Colors.textSecondary,
+    fontSize: 13,
     fontWeight: '700',
   },
   filterTabTextActive: {
-    color: '#FFFFFF',
+    color: Colors.primary,
   },
   listContent: {
     padding: 16,
     gap: 10,
   },
   logCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   logCardUnknown: {
-    borderColor: '#EF444450',
-    backgroundColor: '#1E1B2E',
+    borderColor: '#FECACA',
+    backgroundColor: '#FFFDFD',
   },
   logCardSafe: {
-    borderColor: '#10B98140',
+    borderColor: '#BBF7D0',
+    backgroundColor: '#FAFCFA',
   },
   logCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   logHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  logEmoji: {
-    fontSize: 22,
+  logIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 10,
+  },
+  iconUnknown: {
+    backgroundColor: Colors.dangerLight,
+  },
+  iconSafe: {
+    backgroundColor: Colors.successLight,
+  },
+  logEmoji: {
+    fontSize: 18,
+  },
+  logTextContainer: {
+    flex: 1,
   },
   logNumber: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#F8FAFC',
+    color: Colors.textPrimary,
   },
   logVerdict: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#94A3B8',
     marginTop: 2,
+    letterSpacing: 0.5,
+  },
+  verdictUnknown: {
+    color: Colors.dangerDark,
+  },
+  verdictSafe: {
+    color: Colors.successDark,
   },
   logTime: {
     fontSize: 12,
-    color: '#64748B',
-    fontWeight: '500',
+    color: Colors.textSecondary,
+    marginLeft: 8,
   },
   alertDetailBox: {
+    backgroundColor: Colors.dangerLight,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
     marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#334155',
   },
   alertDetailText: {
     fontSize: 12,
-    color: '#F87171',
+    color: Colors.dangerDark,
     fontWeight: '600',
   },
   emptyContainer: {
-    paddingVertical: 60,
     alignItems: 'center',
+    paddingVertical: 50,
   },
   emptyEmoji: {
     fontSize: 48,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   emptyTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#F8FAFC',
-    marginBottom: 4,
+    color: Colors.textPrimary,
   },
   emptySubtitle: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: Colors.textSecondary,
+    marginTop: 4,
     textAlign: 'center',
+    paddingHorizontal: 20,
   },
 });
