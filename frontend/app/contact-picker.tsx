@@ -148,14 +148,12 @@ export default function ContactPickerScreen() {
     }
   };
 
-  const handleSkip = async () => {
-    await saveLocalContacts([]);
-    router.push('/paywall');
-  };
-
   const handleContinue = async () => {
     if (selectedContacts.length === 0) {
-      await handleSkip();
+      Alert.alert(
+        'Guardian Required',
+        'At least one emergency guardian is mandatory to protect your phone. Please select a contact to alert if a scam is detected.'
+      );
       return;
     }
 
@@ -178,9 +176,9 @@ export default function ContactPickerScreen() {
         >
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleSkip}>
-          <Text style={styles.skipLink}>Skip for now →</Text>
-        </TouchableOpacity>
+        <View style={styles.stepBadge}>
+          <Text style={styles.stepBadgeText}>STEP 3 OF 5</Text>
+        </View>
       </View>
 
       {/* Title & Subtitle */}
@@ -317,36 +315,32 @@ export default function ContactPickerScreen() {
       <View style={styles.footerContainer}>
         {selectedContacts.length === 0 && (
           <Text style={styles.hintNotice}>
-            Select at least 1 contact (or skip to proceed)
+            ⚠️ At least 1 emergency guardian is mandatory
           </Text>
         )}
 
         <TouchableOpacity
           style={[
             styles.continueButton,
-            selectedContacts.length === 0 && styles.continueButtonSecondary,
+            selectedContacts.length === 0 && styles.continueButtonDisabled,
           ]}
+          disabled={selectedContacts.length === 0}
           activeOpacity={0.85}
           onPress={handleContinue}
         >
           <Text
             style={[
               styles.continueButtonText,
-              selectedContacts.length === 0 && styles.continueButtonTextSecondary,
+              selectedContacts.length === 0 && styles.continueButtonTextDisabled,
             ]}
           >
             {selectedContacts.length > 0
-              ? `Continue with ${selectedContacts.length} Guardian(s)`
-              : 'Skip & Continue without Guardians'}
+              ? `Continue with ${selectedContacts.length} Guardian${selectedContacts.length > 1 ? 's' : ''}`
+              : 'Select at Least 1 Guardian'}
           </Text>
-          <Text
-            style={[
-              styles.continueButtonArrow,
-              selectedContacts.length === 0 && styles.continueButtonTextSecondary,
-            ]}
-          >
-            →
-          </Text>
+          {selectedContacts.length > 0 && (
+            <Text style={styles.continueButtonArrow}>→</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -386,10 +380,19 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     fontWeight: '700',
   },
-  skipLink: {
+  stepBadge: {
+    backgroundColor: Colors.surfaceSecondary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  stepBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
     color: Colors.primary,
-    fontSize: 14,
-    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   header: {
     paddingHorizontal: 20,
@@ -621,10 +624,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  continueButtonSecondary: {
-    backgroundColor: Colors.surfaceSecondary,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  continueButtonDisabled: {
+    backgroundColor: Colors.border,
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -634,8 +635,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginRight: 8,
   },
-  continueButtonTextSecondary: {
-    color: Colors.textSecondary,
+  continueButtonTextDisabled: {
+    color: Colors.textMuted,
   },
   continueButtonArrow: {
     color: Colors.textInverse,
