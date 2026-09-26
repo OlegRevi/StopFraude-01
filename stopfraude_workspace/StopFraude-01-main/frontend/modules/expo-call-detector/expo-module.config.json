@@ -1,7 +1,0 @@
-{
-  "name": "expo-call-detector",
-  "platforms": ["android"],
-  "android": {
-    "modules": ["expo.modules.calldetector.CallDetectorModule"]
-  }
-}

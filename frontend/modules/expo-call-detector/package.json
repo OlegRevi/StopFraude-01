@@ -1,0 +1,14 @@
+{
+  "name": "expo-call-detector",
+  "version": "1.0.0",
+  "description": "StopFrauda native call screening, contact checking, and background protection module for Android",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {},
+  "keywords": ["expo", "call-detector", "android", "callscreeningservice", "stopfrauda"],
+  "author": "StopFrauda Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "expo": "*"
+  }
+}

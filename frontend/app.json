@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "StopFrauda",
+    "slug": "stopfrauda",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "stopfrauda",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F172A"
+      },
+      "package": "ro.stopfrauda.app",
+      "permissions": [
+        "android.permission.READ_CONTACTS",
+        "android.permission.READ_PHONE_STATE",
+        "android.permission.READ_CALL_LOG",
+        "android.permission.ANSWER_PHONE_CALLS",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_PHONE_CALL",
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "StopFrauda verifies incoming calls against your contacts to detect unknown scammers and protect your loved ones."
+        }
+      ],
+      "./plugins/withCallDetector.js"
+    ],
+    "extra": {
+      "backendUrl": "http://10.0.2.2:8080"
+    }
+  }
+}
