@@ -121,12 +121,14 @@ export default function ContactPickerScreen() {
     );
   };
 
+  const handleSkip = async () => {
+    await saveLocalContacts([]);
+    router.push('/paywall');
+  };
+
   const handleContinue = async () => {
     if (selectedContacts.length === 0) {
-      Alert.alert(
-        'Select at least 1 Guardian',
-        'Please choose at least 1 emergency contact from your address book so StopFrauda can alert them if an unknown scammer calls.'
-      );
+      await handleSkip();
       return;
     }
 
@@ -144,9 +146,9 @@ export default function ContactPickerScreen() {
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           <Text style={styles.stepBadge}>STEP 3 OF 5</Text>
-          <Text style={styles.countBadge}>
-            {selectedContacts.length} / 5 Selected
-          </Text>
+          <TouchableOpacity onPress={handleSkip}>
+            <Text style={styles.skipHeaderText}>Skip for now →</Text>
+          </TouchableOpacity>
         </View>
         <Text style={styles.title}>Emergency Guardians</Text>
         <Text style={styles.subtitle}>
@@ -254,14 +256,15 @@ export default function ContactPickerScreen() {
         <TouchableOpacity
           style={[
             styles.continueButton,
-            selectedContacts.length === 0 && styles.continueButtonDisabled,
+            selectedContacts.length === 0 && styles.skipFooterButton,
           ]}
           activeOpacity={0.8}
-          onPress={handleContinue}
-          disabled={selectedContacts.length === 0}
+          onPress={selectedContacts.length > 0 ? handleContinue : handleSkip}
         >
           <Text style={styles.continueButtonText}>
-            Continue with {selectedContacts.length} Guardian(s)
+            {selectedContacts.length > 0
+              ? `Continue with ${selectedContacts.length} Guardian(s)`
+              : 'Skip & Continue without Guardians'}
           </Text>
           <Text style={styles.arrowIcon}>→</Text>
         </TouchableOpacity>
@@ -469,6 +472,18 @@ const styles = StyleSheet.create({
   },
   continueButtonDisabled: {
     backgroundColor: '#334155',
+  },
+  skipFooterButton: {
+    backgroundColor: '#1E293B',
+    borderWidth: 1,
+    borderColor: '#475569',
+    shadowOpacity: 0.1,
+  },
+  skipHeaderText: {
+    color: '#38BDF8',
+    fontSize: 12,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
   continueButtonText: {
     color: '#FFFFFF',

@@ -21,7 +21,7 @@
         "backgroundColor": "#0F172A"
       },
       "package": "com.stopfrauda.app",
-      "versionCode": 17,
+      "versionCode": 18,
       "permissions": [
         "android.permission.READ_CONTACTS",
         "android.permission.READ_PHONE_STATE",
