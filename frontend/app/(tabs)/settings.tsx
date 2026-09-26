@@ -29,7 +29,7 @@ export default function SettingsScreen() {
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [autoRejectCalls, setAutoRejectCalls] = useState(false);
   const [smsAlertsEnabled, setSmsAlertsEnabled] = useState(true);
-  const [backendUrl, setBackendUrl] = useState('http://10.0.2.2:8080');
+  const [backendUrl, setBackendUrl] = useState('https://stopfrauda-backend-539120389345.europe-west1.run.app');
 
   useEffect(() => {
     loadSettings();
@@ -162,7 +162,7 @@ export default function SettingsScreen() {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>☁️ Cloud Run Backend Endpoint</Text>
           <Text style={styles.inputSubtitle}>
-            Specify your Cloud Run backend URL (or emulator default http://10.0.2.2:8080):
+            Your Cloud Run backend API endpoint:
           </Text>
 
           <TextInput

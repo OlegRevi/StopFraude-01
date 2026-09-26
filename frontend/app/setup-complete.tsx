@@ -16,6 +16,7 @@ import {
   getLocalContacts,
   setOnboardingCompleted,
   appendCallLog,
+  getStoredBackendUrl,
 } from '../services/storage';
 import {
   simulateIncomingCall,
@@ -44,7 +45,8 @@ export default function SetupCompleteScreen() {
       setContacts(savedContacts);
 
       // Configure native module
-      await configureCallDetector(userId, 'http://10.0.2.2:8080', false);
+      const backendUrl = await getStoredBackendUrl();
+      await configureCallDetector(userId, backendUrl, false);
       await startProtection();
 
       // Dispatch welcome SMS via Twilio Cloud Run endpoint

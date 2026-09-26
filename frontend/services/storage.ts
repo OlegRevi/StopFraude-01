@@ -1,5 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { EmergencyContact, CallLogEntry, UserSubscription } from '../types';
+
+export const CLOUD_RUN_BACKEND_URL =
+  Constants.expoConfig?.extra?.backendUrl ||
+  'https://stopfrauda-backend-539120389345.europe-west1.run.app';
 
 const STORAGE_KEYS = {
   USER_ID: '@stopfrauda_user_id',
@@ -109,7 +114,10 @@ export async function isOnboardingCompleted(): Promise<boolean> {
 
 export async function getStoredBackendUrl(): Promise<string> {
   const val = await AsyncStorage.getItem(STORAGE_KEYS.BACKEND_URL);
-  return val || 'http://10.0.2.2:8080';
+  if (val && !val.includes('10.0.2.2')) {
+    return val;
+  }
+  return CLOUD_RUN_BACKEND_URL;
 }
 
 export async function setStoredBackendUrl(url: string): Promise<void> {

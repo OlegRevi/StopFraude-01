@@ -29,7 +29,7 @@ class CallScreeningServiceImpl : CallScreeningService() {
 
     companion object {
         private const val TAG = "StopFrauda.Screening"
-        var backendBaseUrl: String = "http://10.0.2.2:8080" // Default for local Android emulator
+        var backendBaseUrl: String = "https://stopfrauda-backend-539120389345.europe-west1.run.app" // Live Cloud Run backend
         var currentUserId: String = "user_default"
         var autoRejectUnknown: Boolean = false
     }
