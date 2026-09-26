@@ -42,12 +42,14 @@ async def save_contacts_and_send_welcome(payload: WelcomeContactsRequest):
     saved_contacts = firestore_service.save_emergency_contacts(user_id, raw_contacts)
 
     # 3. Dispatch welcome SMS via Twilio
+    lang = payload.lang or "ro"
     sent_count = 0
     for contact in saved_contacts:
         res = twilio_service.send_welcome_sms(
             recipient_name=contact.name,
             recipient_phone=contact.phone,
-            user_name=user_name
+            user_name=user_name,
+            lang=lang
         )
         if res.get("success"):
             sent_count += 1

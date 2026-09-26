@@ -31,6 +31,7 @@ class EmergencyContactModel(EmergencyContactInput):
 class WelcomeContactsRequest(BaseModel):
     userId: str = Field(..., min_length=1)
     contacts: List[EmergencyContactInput] = Field(..., max_length=5)
+    lang: Optional[str] = Field("ro", description="Preferred language for SMS notifications ('ro' or 'en')")
 
 
 class WelcomeContactsResponse(BaseModel):
@@ -44,6 +45,7 @@ class AlertDispatchRequest(BaseModel):
     userId: str = Field(..., min_length=1)
     callerNumber: str = Field(..., min_length=1)
     timestamp: str = Field(..., description="ISO 8601 timestamp string")
+    lang: Optional[str] = Field("ro", description="Preferred language for SMS notifications ('ro' or 'en')")
 
 
 class AlertDispatchResponse(BaseModel):

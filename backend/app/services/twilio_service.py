@@ -21,22 +21,38 @@ class TwilioService:
         else:
             logger.info("Twilio running in SIMULATION/DEV mode (credentials not configured).")
 
-    def send_welcome_sms(self, recipient_name: str, recipient_phone: str, user_name: str = "A family member") -> Dict[str, Any]:
+    def send_welcome_sms(self, recipient_name: str, recipient_phone: str, user_name: str = "A family member", lang: str = "ro") -> Dict[str, Any]:
         """Sends an introductory SMS when an emergency contact is registered."""
-        body = (
-            f"🛡️ StopFrauda Notice: Hello {recipient_name}, {user_name} has designated you as "
-            f"an Emergency Guardian. You will receive instant SMS alerts if an unknown number calls them, "
-            f"protecting them against fraud and scams."
-        )
+        if lang == "en":
+            body = (
+                f"🛡️ StopFrauda Notice: Hello {recipient_name}, {user_name} has designated you as "
+                f"an Emergency Guardian. You will receive instant SMS alerts if an unknown number calls them, "
+                f"protecting them against fraud and scams."
+            )
+        else:
+            default_user = "Un membru al familiei" if user_name in ("A family member", "StopFrauda Protected User") else user_name
+            body = (
+                f"🛡️ Notificare StopFrauda: Bună {recipient_name}, {default_user} te-a desemnat "
+                f"Gardian de Urgență. Vei primi alerte SMS instantanee dacă un număr necunoscut îi apelează, "
+                f"protejându-i împotriva tentativelor de fraudă și escrocherii."
+            )
         return self._send_sms(recipient_phone, body)
 
-    def send_unknown_call_alert(self, recipient_phone: str, recipient_name: str, caller_number: str, user_name: str = "Your protected family member") -> Dict[str, Any]:
+    def send_unknown_call_alert(self, recipient_phone: str, recipient_name: str, caller_number: str, user_name: str = "Your protected family member", lang: str = "ro") -> Dict[str, Any]:
         """Sends an urgent scam alert SMS to an emergency contact during an active unknown call."""
-        body = (
-            f"⚠️ StopFrauda FRAUD ALERT: {user_name} is currently receiving an incoming call from an "
-            f"UNKNOWN number: {caller_number}. This caller is not in their address book. "
-            f"Please check in with them to ensure their safety."
-        )
+        if lang == "en":
+            body = (
+                f"⚠️ StopFrauda FRAUD ALERT: {user_name} is currently receiving an incoming call from an "
+                f"UNKNOWN number: {caller_number}. This caller is not in their address book. "
+                f"Please check in with them to ensure their safety."
+            )
+        else:
+            default_user = "Membrul protejat al familiei tale" if user_name in ("Your protected family member", "StopFrauda Protected User", "A family member") else user_name
+            body = (
+                f"⚠️ ALERTĂ FRAUDĂ StopFrauda: {default_user} primește în acest moment un apel de la un număr "
+                f"NECUNOSCUT: {caller_number}. Acest număr nu se află în agenda telefonică. "
+                f"Te rugăm să iei legătura cu ei pentru a le verifica siguranța."
+            )
         return self._send_sms(recipient_phone, body)
 
     def _send_sms(self, to_phone: str, body: str) -> Dict[str, Any]:

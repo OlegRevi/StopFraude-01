@@ -1,8 +1,16 @@
 import pytest
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def mock_twilio_sms():
+    with patch("app.services.twilio_service.twilio_service._send_sms") as mock_send:
+        mock_send.return_value = {"success": True, "sid": "SM_test_mock", "simulated": True}
+        yield mock_send
 
 
 def test_health_endpoint():
@@ -85,3 +93,35 @@ def test_stripe_checkout_early_bird():
     sub_data = sub_res.json()
     assert sub_data["status"] == "active"
     assert sub_data["planType"] == "EARLY_BIRD"
+
+
+def test_multilingual_sms_generation():
+    from app.services.twilio_service import twilio_service
+
+    with patch.object(twilio_service, "_send_sms") as mock_send:
+        mock_send.return_value = {"success": True, "sid": "SM_123", "simulated": True}
+
+        # Test Romanian (default)
+        twilio_service.send_welcome_sms("Ion", "+40722111222", "Maria", lang="ro")
+        args_ro = mock_send.call_args[0]
+        assert "Notificare StopFrauda" in args_ro[1]
+        assert "Gardian de Urgență" in args_ro[1]
+
+        # Test English
+        twilio_service.send_welcome_sms("John", "+15551234567", "Mary", lang="en")
+        args_en = mock_send.call_args[0]
+        assert "StopFrauda Notice" in args_en[1]
+        assert "Emergency Guardian" in args_en[1]
+
+        # Test Fraud alert Romanian
+        twilio_service.send_unknown_call_alert("+40722111222", "Ion", "+40788999000", "Maria", lang="ro")
+        alert_ro = mock_send.call_args[0]
+        assert "ALERTĂ FRAUDĂ StopFrauda" in alert_ro[1]
+        assert "NECUNOSCUT" in alert_ro[1]
+
+        # Test Fraud alert English
+        twilio_service.send_unknown_call_alert("+15551234567", "John", "+18005550199", "Mary", lang="en")
+        alert_en = mock_send.call_args[0]
+        assert "StopFrauda FRAUD ALERT" in alert_en[1]
+        assert "UNKNOWN number" in alert_en[1]
+

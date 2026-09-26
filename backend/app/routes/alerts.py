@@ -32,13 +32,15 @@ async def dispatch_fraud_alert(payload: AlertDispatchRequest):
         contacts = firestore_service.get_emergency_contacts(user_id)
 
         dispatched_count = 0
+        lang = payload.lang or "ro"
         if contacts:
             for contact in contacts:
                 res = twilio_service.send_unknown_call_alert(
                     recipient_phone=contact.phone,
                     recipient_name=contact.name,
                     caller_number=caller_number,
-                    user_name=user_display_name
+                    user_name=user_display_name,
+                    lang=lang
                 )
                 if res.get("success"):
                     dispatched_count += 1
