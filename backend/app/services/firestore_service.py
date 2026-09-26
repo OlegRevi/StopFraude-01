@@ -102,36 +102,40 @@ class FirestoreService:
         now = datetime.now(timezone.utc)
 
         if self.db:
-            batch = self.db.batch()
-            contacts_coll = self.db.collection("users").document(user_id).collection("emergency_contacts")
-            
-            # Remove existing contacts to enforce up to 5 clean selection
-            existing = contacts_coll.stream()
-            for doc in existing:
-                batch.delete(doc.reference)
+            try:
+                batch = self.db.batch()
+                contacts_coll = self.db.collection("users").document(user_id).collection("emergency_contacts")
+                
+                # Remove existing contacts to enforce up to 5 clean selection
+                existing = contacts_coll.stream()
+                for doc in existing:
+                    batch.delete(doc.reference)
 
-            for c in contacts:
-                contact_id = str(uuid.uuid4())
-                c_data = {
-                    "id": contact_id,
-                    "contactName": c.name,
-                    "phoneNumber": c.phone,
-                    "email": c.email or "",
-                    "isVerified": True,
-                    "createdAt": now.isoformat()
-                }
-                c_ref = contacts_coll.document(contact_id)
-                batch.set(c_ref, c_data)
-                saved.append(EmergencyContactModel(
-                    id=contact_id,
-                    name=c.name,
-                    phone=c.phone,
-                    email=c.email,
-                    isVerified=True,
-                    createdAt=now
-                ))
-            batch.commit()
-            return saved
+                for c in contacts:
+                    contact_id = str(uuid.uuid4())
+                    c_data = {
+                        "id": contact_id,
+                        "contactName": c.name,
+                        "phoneNumber": c.phone,
+                        "email": c.email or "",
+                        "isVerified": True,
+                        "createdAt": now.isoformat()
+                    }
+                    c_ref = contacts_coll.document(contact_id)
+                    batch.set(c_ref, c_data)
+                    saved.append(EmergencyContactModel(
+                        id=contact_id,
+                        name=c.name,
+                        phone=c.phone,
+                        email=c.email,
+                        isVerified=True,
+                        createdAt=now
+                    ))
+                batch.commit()
+                return saved
+            except Exception as e:
+                logger.warning(f"Firestore save_emergency_contacts failed: {e}. Falling back to in-memory.")
+                saved = []
 
         # In-memory fallback
         self._mock_contacts[user_id] = {}
@@ -152,17 +156,20 @@ class FirestoreService:
     def get_emergency_contacts(self, user_id: str) -> List[EmergencyContactModel]:
         contacts: List[EmergencyContactModel] = []
         if self.db:
-            docs = self.db.collection("users").document(user_id).collection("emergency_contacts").stream()
-            for doc in docs:
-                data = doc.to_dict()
-                contacts.append(EmergencyContactModel(
-                    id=data.get("id", doc.id),
-                    name=data.get("contactName", ""),
-                    phone=data.get("phoneNumber", ""),
-                    email=data.get("email"),
-                    isVerified=data.get("isVerified", False)
-                ))
-            return contacts
+            try:
+                docs = self.db.collection("users").document(user_id).collection("emergency_contacts").stream()
+                for doc in docs:
+                    data = doc.to_dict()
+                    contacts.append(EmergencyContactModel(
+                        id=data.get("id", doc.id),
+                        name=data.get("contactName", ""),
+                        phone=data.get("phoneNumber", ""),
+                        email=data.get("email"),
+                        isVerified=data.get("isVerified", False)
+                    ))
+                return contacts
+            except Exception as e:
+                logger.warning(f"Firestore get_emergency_contacts failed: {e}. Falling back to in-memory.")
 
         # In-memory fallback
         user_contacts = self._mock_contacts.get(user_id, {})
@@ -181,9 +188,12 @@ class FirestoreService:
         }
 
         if self.db:
-            call_ref = self.db.collection("users").document(user_id).collection("call_logs").document(call_id)
-            call_ref.set(data)
-            return call_id
+            try:
+                call_ref = self.db.collection("users").document(user_id).collection("call_logs").document(call_id)
+                call_ref.set(data)
+                return call_id
+            except Exception as e:
+                logger.warning(f"Firestore log_call failed: {e}. Falling back to in-memory.")
 
         # In-memory fallback
         if user_id not in self._mock_call_logs:
@@ -194,24 +204,27 @@ class FirestoreService:
     def get_call_logs(self, user_id: str, limit: int = 50) -> List[CallLogModel]:
         logs: List[CallLogModel] = []
         if self.db:
-            docs = (
-                self.db.collection("users")
-                .document(user_id)
-                .collection("call_logs")
-                .order_by("timestamp", direction="DESCENDING")
-                .limit(limit)
-                .stream()
-            )
-            for doc in docs:
-                data = doc.to_dict()
-                logs.append(CallLogModel(
-                    id=doc.id,
-                    incomingNumber=data.get("incomingNumber", ""),
-                    isUnknown=data.get("isUnknown", True),
-                    alertDispatched=data.get("alertDispatched", False),
-                    timestamp=data.get("timestamp", "")
-                ))
-            return logs
+            try:
+                docs = (
+                    self.db.collection("users")
+                    .document(user_id)
+                    .collection("call_logs")
+                    .order_by("timestamp", direction="DESCENDING")
+                    .limit(limit)
+                    .stream()
+                )
+                for doc in docs:
+                    data = doc.to_dict()
+                    logs.append(CallLogModel(
+                        id=doc.id,
+                        incomingNumber=data.get("incomingNumber", ""),
+                        isUnknown=data.get("isUnknown", True),
+                        alertDispatched=data.get("alertDispatched", False),
+                        timestamp=data.get("timestamp", "")
+                    ))
+                return logs
+            except Exception as e:
+                logger.warning(f"Firestore get_call_logs failed: {e}. Falling back to in-memory.")
 
         # In-memory fallback
         raw_logs = self._mock_call_logs.get(user_id, [])[:limit]
@@ -246,29 +259,35 @@ class FirestoreService:
         }
 
         if self.db:
-            self.db.collection("subscriptions").document(user_id).set(data, merge=True)
-            return sub
+            try:
+                self.db.collection("subscriptions").document(user_id).set(data, merge=True)
+                return sub
+            except Exception as e:
+                logger.warning(f"Firestore save_subscription failed: {e}. Falling back to in-memory.")
 
         self._mock_subscriptions[user_id] = data
         return sub
 
     def get_subscription(self, user_id: str) -> Optional[SubscriptionModel]:
         if self.db:
-            doc = self.db.collection("subscriptions").document(user_id).get()
-            if doc.exists:
-                data = doc.to_dict()
-                expires_at = None
-                if data.get("expiresAt"):
-                    expires_at = datetime.fromisoformat(data["expiresAt"])
-                return SubscriptionModel(
-                    userId=user_id,
-                    stripeCustomerId=data.get("stripeCustomerId"),
-                    stripeSubscriptionId=data.get("stripeSubscriptionId"),
-                    planType=PlanType(data.get("planType", PlanType.EARLY_BIRD.value)),
-                    status=SubscriptionStatus(data.get("status", SubscriptionStatus.ACTIVE.value)),
-                    expiresAt=expires_at
-                )
-            return None
+            try:
+                doc = self.db.collection("subscriptions").document(user_id).get()
+                if doc.exists:
+                    data = doc.to_dict()
+                    expires_at = None
+                    if data.get("expiresAt"):
+                        expires_at = datetime.fromisoformat(data["expiresAt"])
+                    return SubscriptionModel(
+                        userId=user_id,
+                        stripeCustomerId=data.get("stripeCustomerId"),
+                        stripeSubscriptionId=data.get("stripeSubscriptionId"),
+                        planType=PlanType(data.get("planType", PlanType.EARLY_BIRD.value)),
+                        status=SubscriptionStatus(data.get("status", SubscriptionStatus.ACTIVE.value)),
+                        expiresAt=expires_at
+                    )
+                return None
+            except Exception as e:
+                logger.warning(f"Firestore get_subscription failed: {e}. Falling back to in-memory.")
 
         # In-memory fallback
         data = self._mock_subscriptions.get(user_id)
