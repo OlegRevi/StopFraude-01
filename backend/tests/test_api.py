@@ -125,3 +125,34 @@ def test_multilingual_sms_generation():
         assert "StopFrauda FRAUD ALERT" in alert_en[1]
         assert "UNKNOWN number" in alert_en[1]
 
+
+def test_personalized_user_name_dispatch():
+    from app.services.twilio_service import twilio_service
+
+    with patch.object(twilio_service, "_send_sms") as mock_send:
+        mock_send.return_value = {"success": True, "sid": "SM_personalized", "simulated": True}
+
+        # Dispatch welcome SMS with specific userName
+        client.post("/api/v1/contacts/send-welcome", json={
+            "userId": "usr_personalized_1",
+            "userName": "Elena Popescu",
+            "lang": "ro",
+            "contacts": [{"name": "Mihai", "phone": "+40722333444"}]
+        })
+        args = mock_send.call_args[0]
+        assert "Elena Popescu" in args[1]
+        assert "Notificare StopFrauda" in args[1]
+
+        # Dispatch alert with specific userName
+        client.post("/api/v1/alerts/dispatch", json={
+            "userId": "usr_personalized_1",
+            "userName": "Elena Popescu",
+            "callerNumber": "+40799888777",
+            "timestamp": "2026-09-26T21:00:00Z",
+            "lang": "ro"
+        })
+        alert_args = mock_send.call_args[0]
+        assert "Elena Popescu" in alert_args[1]
+        assert "ALERTĂ FRAUDĂ StopFrauda" in alert_args[1]
+
+

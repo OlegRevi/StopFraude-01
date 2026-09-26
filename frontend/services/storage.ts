@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { EmergencyContact, CallLogEntry, UserSubscription } from '../types';
+import { EmergencyContact, CallLogEntry, UserSubscription, UserProfile } from '../types';
 
 export const CLOUD_RUN_BACKEND_URL =
   Constants.expoConfig?.extra?.backendUrl ||
@@ -8,6 +8,7 @@ export const CLOUD_RUN_BACKEND_URL =
 
 const STORAGE_KEYS = {
   USER_ID: '@stopfrauda_user_id',
+  USER_PROFILE: '@stopfrauda_user_profile',
   CONTACTS: '@stopfrauda_emergency_contacts',
   CALL_LOGS: '@stopfrauda_call_logs',
   SUBSCRIPTION: '@stopfrauda_subscription',
@@ -29,6 +30,23 @@ export async function getOrCreateUserId(): Promise<string> {
     return newId;
   } catch {
     return 'usr_default_local';
+  }
+}
+
+export async function saveUserProfile(profile: UserProfile): Promise<void> {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+  } catch (e) {
+    console.error('Failed to save user profile', e);
+  }
+}
+
+export async function getUserProfile(): Promise<UserProfile | null> {
+  try {
+    const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_PROFILE);
+    return data ? JSON.parse(data) : null;
+  } catch {
+    return null;
   }
 }
 

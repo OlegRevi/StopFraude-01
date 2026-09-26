@@ -14,6 +14,20 @@ export interface Translations {
   welcomeActivateBtn: string;
   welcomeLanguageLabel: string;
 
+  // Profile Screen (Step 2)
+  profileStepBadge: string;
+  profileTitle: string;
+  profileSubtitle: string;
+  profileNameLabel: string;
+  profileNamePlaceholder: string;
+  profileNameHint: string;
+  profilePhoneLabel: string;
+  profilePhonePlaceholder: string;
+  profilePhoneHint: string;
+  profileContinueBtn: string;
+  profileValidationName: string;
+  profileValidationPhone: string;
+
   // Permissions Screen
   permStepBadge: string;
   permTitle: string;
@@ -143,8 +157,22 @@ export const translations: Record<SupportedLanguage, Translations> = {
     welcomeActivateBtn: 'Activează Scutul Antifraudă',
     welcomeLanguageLabel: 'Limbă',
 
+    // Profile Screen (Step 2)
+    profileStepBadge: 'PASUL 2 DIN 5',
+    profileTitle: 'Profilul Tău de Protecție',
+    profileSubtitle: 'Introdu numele și numărul tău pentru ca gardienii să știe cine este protejat.',
+    profileNameLabel: 'Numele Tău Complet',
+    profileNamePlaceholder: 'ex: Elena Popescu',
+    profileNameHint: 'Numele tău va apărea în alertele SMS trimise gardienilor tăi.',
+    profilePhoneLabel: 'Numărul Tău de Telefon',
+    profilePhonePlaceholder: 'ex: +40 722 123 456',
+    profilePhoneHint: 'Telefonul protejat activ împotriva escrocilor.',
+    profileContinueBtn: 'Continuă către Permisiuni',
+    profileValidationName: 'Te rugăm să introduci numele tău.',
+    profileValidationPhone: 'Te rugăm să introduci un număr de telefon valid.',
+
     // Permissions Screen
-    permStepBadge: 'PASUL 2 DIN 5',
+    permStepBadge: 'PASUL 3 DIN 5',
     permTitle: 'Avem Nevoie de Permisiuni',
     permSubtitle: 'Pentru a te proteja de escrocherii, avem nevoie de acces la:',
     permContactsTitle: 'Contacte',
@@ -156,7 +184,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     permContinueBtn: 'Continuă',
 
     // Contact Picker Screen
-    contactsStepBadge: 'PASUL 3 DIN 5',
+    contactsStepBadge: 'PASUL 4 DIN 5',
     contactsTitle: 'Gardieni de Urgență',
     contactsSubtitle: 'Pe cine să alertăm când este detectat un apel suspect?',
     contactsSearchPlaceholder: 'Caută în contactele tale...',
@@ -173,7 +201,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     contactsMaxReachedMsg: 'Poți desemna maxim 5 gardieni de urgență.',
 
     // Paywall / Plans Screen
-    paywallStepBadge: 'PASUL 4 DIN 5',
+    paywallStepBadge: 'PASUL 5 DIN 5',
     paywallTitle: 'Alege Planul de Protecție',
     paywallSubtitle: 'Activează protecția avansată cu alerte SMS instantanee.',
     paywallPromoTitle: 'Ofertă Specială Activă',
@@ -271,8 +299,22 @@ export const translations: Record<SupportedLanguage, Translations> = {
     welcomeActivateBtn: 'Activate Scam Shield',
     welcomeLanguageLabel: 'Language',
 
+    // Profile Screen (Step 2)
+    profileStepBadge: 'STEP 2 OF 5',
+    profileTitle: 'Your Protection Profile',
+    profileSubtitle: 'Enter your name and phone number so your emergency guardians know who is protected.',
+    profileNameLabel: 'Your Full Name',
+    profileNamePlaceholder: 'e.g. Elena Popescu',
+    profileNameHint: 'Your name will appear in urgent SMS alerts sent to your emergency guardians.',
+    profilePhoneLabel: 'Your Phone Number',
+    profilePhonePlaceholder: 'e.g. +40 722 123 456',
+    profilePhoneHint: 'The phone actively protected against scam calls.',
+    profileContinueBtn: 'Continue to Permissions',
+    profileValidationName: 'Please enter your name.',
+    profileValidationPhone: 'Please enter a valid phone number.',
+
     // Permissions Screen
-    permStepBadge: 'STEP 2 OF 5',
+    permStepBadge: 'STEP 3 OF 5',
     permTitle: 'We Need Your Permission',
     permSubtitle: 'To protect you from scams, we need access to:',
     permContactsTitle: 'Contacts',
@@ -284,7 +326,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     permContinueBtn: 'Continue',
 
     // Contact Picker Screen
-    contactsStepBadge: 'STEP 3 OF 5',
+    contactsStepBadge: 'STEP 4 OF 5',
     contactsTitle: 'Emergency Contacts',
     contactsSubtitle: 'Who should we alert if a scam is detected?',
     contactsSearchPlaceholder: 'Search your contacts...',
@@ -301,7 +343,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     contactsMaxReachedMsg: 'You can designate up to 5 emergency guardians.',
 
     // Paywall / Plans Screen
-    paywallStepBadge: 'STEP 4 OF 5',
+    paywallStepBadge: 'STEP 5 OF 5',
     paywallTitle: 'Choose Your Protection Plan',
     paywallSubtitle: 'Activate comprehensive scam protection with instant SMS alerts.',
     paywallPromoTitle: 'Early Bird Special Active',

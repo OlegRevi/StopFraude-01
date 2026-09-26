@@ -6,6 +6,11 @@ export interface EmergencyContact {
   isVerified?: boolean;
 }
 
+export interface UserProfile {
+  name: string;
+  phone: string;
+}
+
 export interface CallLogEntry {
   id: string;
   incomingNumber: string;

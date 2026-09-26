@@ -120,7 +120,7 @@ export default function WelcomeScreen() {
           <TouchableOpacity
             style={styles.primaryButton}
             activeOpacity={0.85}
-            onPress={() => router.push('/permissions')}
+            onPress={() => router.push('/profile')}
           >
             <Text style={styles.primaryButtonText}>{t('welcomeActivateBtn')}</Text>
             <Text style={styles.arrowIcon}>→</Text>

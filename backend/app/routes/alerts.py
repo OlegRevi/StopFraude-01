@@ -26,13 +26,14 @@ async def dispatch_fraud_alert(payload: AlertDispatchRequest):
     timestamp = payload.timestamp
 
     try:
+        lang = payload.lang or "ro"
+        default_display = "Membrul protejat al familiei tale" if lang == "ro" else "Your protected family member"
         # 1. Fetch user profile and emergency contacts
         user_data = firestore_service.get_or_create_user(user_id)
-        user_display_name = user_data.get("displayName") or "StopFrauda Protected User"
+        user_display_name = payload.userName or user_data.get("displayName") or default_display
         contacts = firestore_service.get_emergency_contacts(user_id)
 
         dispatched_count = 0
-        lang = payload.lang or "ro"
         if contacts:
             for contact in contacts:
                 res = twilio_service.send_unknown_call_alert(

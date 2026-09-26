@@ -1,5 +1,5 @@
 import { EmergencyContact, CallLogEntry, UserSubscription, PlanType } from '../types';
-import { getStoredBackendUrl, getSavedLanguage } from './storage';
+import { getStoredBackendUrl, getSavedLanguage, getUserProfile } from './storage';
 
 /**
  * StopFrauda Cloud Run API Client
@@ -36,9 +36,12 @@ export class ApiClient {
     try {
       const baseUrl = await this.getBaseUrl();
       const lang = await getSavedLanguage();
+      const profile = await getUserProfile();
       const payload = {
         userId,
         lang,
+        userName: profile?.name || undefined,
+        userPhone: profile?.phone || undefined,
         contacts: contacts.map((c) => ({
           name: c.name,
           phone: c.phone,
@@ -80,11 +83,13 @@ export class ApiClient {
     try {
       const baseUrl = await this.getBaseUrl();
       const lang = await getSavedLanguage();
+      const profile = await getUserProfile();
       const payload = {
         userId,
         callerNumber,
         timestamp,
         lang,
+        userName: profile?.name || undefined,
       };
 
       const res = await fetch(`${baseUrl}/api/v1/alerts/dispatch`, {
