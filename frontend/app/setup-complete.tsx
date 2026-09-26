@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ApiClient } from '../services/api';
@@ -108,7 +109,11 @@ export default function SetupCompleteScreen() {
         {/* Shield Celebration Icon */}
         <View style={styles.celebrationBox}>
           <View style={styles.celebrationCircle}>
-            <Text style={styles.celebrationEmoji}>🎉</Text>
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={{ width: 62, height: 62 }}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.stepBadge}>SETUP COMPLETE</Text>
           <Text style={styles.title}>You Are Now Protected!</Text>

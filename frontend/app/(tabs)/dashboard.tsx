@@ -9,6 +9,7 @@ import {
   Switch,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import {
   addCallScreenedListener,
@@ -202,9 +203,17 @@ export default function DashboardScreen() {
 
           <View style={styles.shieldGraphic}>
             <View style={[styles.shieldOuterRing, isActive ? styles.shieldRingActive : styles.shieldRingInactive]}>
-              <View style={[styles.shieldInnerCircle, isActive ? styles.shieldCircleActive : styles.shieldCircleInactive]}>
-                <Text style={styles.shieldEmoji}>{isActive ? '🛡️' : '⚠️'}</Text>
-              </View>
+              {isActive ? (
+                <Image
+                  source={require('../../assets/images/logo.png')}
+                  style={styles.dashboardLogo}
+                  resizeMode="contain"
+                />
+              ) : (
+                <View style={styles.shieldCircleInactive}>
+                  <Text style={styles.shieldEmoji}>⚠️</Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -420,18 +429,17 @@ const styles = StyleSheet.create({
   shieldRingInactive: {
     backgroundColor: Colors.surfaceSecondary,
   },
-  shieldInnerCircle: {
+  dashboardLogo: {
+    width: 72,
+    height: 72,
+  },
+  shieldCircleInactive: {
     width: 68,
     height: 68,
     borderRadius: 34,
+    backgroundColor: Colors.textMuted,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  shieldCircleActive: {
-    backgroundColor: Colors.primary,
-  },
-  shieldCircleInactive: {
-    backgroundColor: Colors.textMuted,
   },
   shieldEmoji: {
     fontSize: 34,

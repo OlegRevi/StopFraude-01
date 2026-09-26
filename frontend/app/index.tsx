@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { isOnboardingCompleted } from '../services/storage';
@@ -47,12 +48,14 @@ export default function WelcomeScreen() {
           </View>
         </View>
 
-        {/* Hero Concentric Shield Icon */}
+        {/* Hero Concentric Shield Icon with Official Logo */}
         <View style={styles.heroContainer}>
           <View style={styles.outerCircle}>
-            <View style={styles.innerCircle}>
-              <Text style={styles.heroShield}>🛡️</Text>
-            </View>
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
         </View>
 
@@ -159,22 +162,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  innerCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderWidth: 6,
+    borderColor: '#E0E7FF',
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 8,
+    elevation: 4,
   },
-  heroShield: {
-    fontSize: 44,
+  logoImage: {
+    width: 96,
+    height: 96,
   },
   headerBox: {
     alignItems: 'center',
