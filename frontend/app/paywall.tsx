@@ -15,9 +15,11 @@ import { getOrCreateUserId, saveLocalSubscription } from '../services/storage';
 import { PlanType } from '../types';
 import { Colors } from '../constants/theme';
 import { StopFraudaBrand } from '../components/StopFraudaBrand';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function PaywallScreen() {
   const router = useRouter();
+  const { t, isRomanian } = useLanguage();
 
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('EARLY_BIRD');
   const [submitting, setSubmitting] = useState(false);
@@ -50,7 +52,7 @@ export default function PaywallScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Top Header Row with Back Button */}
+        {/* Top Header Row with Back Button & Step Badge */}
         <View style={styles.topHeader}>
           <TouchableOpacity
             style={styles.backCircle}
@@ -59,6 +61,9 @@ export default function PaywallScreen() {
           >
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
+          <View style={styles.stepBadge}>
+            <Text style={styles.stepBadgeText}>{t('paywallStepBadge')}</Text>
+          </View>
         </View>
 
         {/* Center Star Badge */}
@@ -70,9 +75,9 @@ export default function PaywallScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Choose Your Protection</Text>
+          <Text style={styles.title}>{t('paywallTitle')}</Text>
           <Text style={styles.subtitle}>
-            Activate comprehensive 24/7 scam protection with instant SMS alerts for your loved ones.
+            {t('paywallSubtitle')}
           </Text>
         </View>
 
@@ -80,9 +85,9 @@ export default function PaywallScreen() {
         <View style={styles.earlyBirdPromo}>
           <Text style={styles.promoEmoji}>🎉</Text>
           <View style={styles.promoTextContainer}>
-            <Text style={styles.promoTitle}>Early Bird Special Active</Text>
+            <Text style={styles.promoTitle}>{t('paywallPromoTitle')}</Text>
             <Text style={styles.promoDesc}>
-              1 full year of <StopFraudaBrand fontWeight="700" /> protection completely free!
+              {t('paywallPromoDesc')}
             </Text>
           </View>
         </View>
@@ -101,27 +106,33 @@ export default function PaywallScreen() {
             <View style={styles.planHeader}>
               <View>
                 <View style={styles.badgeRow}>
-                  <Text style={styles.popularBadge}>RECOMMENDED</Text>
+                  <Text style={styles.popularBadge}>{t('paywallEarlyBirdBadge')}</Text>
                 </View>
-                <Text style={styles.planName}>Early Bird Protection</Text>
+                <Text style={styles.planName}>{t('paywallEarlyBirdTitle')}</Text>
               </View>
               <View style={styles.priceContainer}>
                 <Text style={styles.priceCurrency}>$</Text>
                 <Text style={styles.priceAmount}>0</Text>
-                <Text style={styles.pricePeriod}>/ 1st yr</Text>
+                <Text style={styles.pricePeriod}>
+                  {isRomanian ? '/ primul an' : '/ 1st yr'}
+                </Text>
               </View>
             </View>
 
             <Text style={styles.planSummary}>
-              Enjoy complete peace of mind with all premium features unlocked for 12 months.
+              {isRomanian
+                ? 'Bucură-te de liniște completă cu toate funcțiile deblocate timp de 12 luni.'
+                : 'Enjoy complete peace of mind with all premium features unlocked for 12 months.'}
             </Text>
 
             <View style={styles.perksList}>
-              <Text style={styles.perkItem}>✓ Real-time incoming call screening</Text>
-              <Text style={styles.perkItem}>✓ Up to 5 Emergency Guardians alerted via Twilio SMS</Text>
-              <Text style={styles.perkItem}>✓ Instant unknown caller warning notification</Text>
-              <Text style={styles.perkItem}>✓ Detailed scam history and reporting</Text>
-              <Text style={styles.perkItem}>✓ 100% private: Zero audio recording</Text>
+              <Text style={styles.perkItem}>✓ {t('paywallBenefit1')}</Text>
+              <Text style={styles.perkItem}>✓ {t('paywallBenefit2')}</Text>
+              <Text style={styles.perkItem}>✓ {t('paywallBenefit3')}</Text>
+              <Text style={styles.perkItem}>✓ {t('paywallBenefit4')}</Text>
+              <Text style={styles.perkItem}>
+                ✓ {isRomanian ? '100% confidențial: Fără înregistrare audio' : '100% private: Zero audio recording'}
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -136,31 +147,43 @@ export default function PaywallScreen() {
           >
             <View style={styles.planHeader}>
               <View>
-                <Text style={styles.standardBadge}>STANDARD</Text>
-                <Text style={styles.planName}>Standard Annual</Text>
+                <Text style={styles.standardBadge}>{t('paywallAnnualBadge')}</Text>
+                <Text style={styles.planName}>{t('paywallAnnualTitle')}</Text>
               </View>
               <View style={styles.priceContainer}>
                 <Text style={styles.priceCurrency}>$</Text>
                 <Text style={styles.priceAmount}>10</Text>
-                <Text style={styles.pricePeriod}>/ year</Text>
+                <Text style={styles.pricePeriod}>
+                  {isRomanian ? '/ an' : '/ year'}
+                </Text>
               </View>
             </View>
 
             <Text style={styles.planSummary}>
-              Billed annually. Less than $0.85/month to protect yourself and your family from fraudsters.
+              {isRomanian
+                ? 'Facturat anual. Mai puțin de 4 lei/lună pentru a-ți proteja întreaga familie împotriva escrocilor.'
+                : 'Billed annually. Less than $0.85/month to protect yourself and your family from fraudsters.'}
             </Text>
 
             <View style={styles.perksList}>
-              <Text style={styles.perkItem}>✓ Full 24/7 background scam screening</Text>
-              <Text style={styles.perkItem}>✓ Unlimited emergency SMS dispatches</Text>
-              <Text style={styles.perkItem}>✓ Cancel anytime with one tap</Text>
+              <Text style={styles.perkItem}>
+                ✓ {isRomanian ? 'Monitorizare 24/7 a apelurilor în fundal' : 'Full 24/7 background scam screening'}
+              </Text>
+              <Text style={styles.perkItem}>
+                ✓ {isRomanian ? 'Alerte SMS nelimitate către gardieni' : 'Unlimited emergency SMS dispatches'}
+              </Text>
+              <Text style={styles.perkItem}>
+                ✓ {isRomanian ? 'Anulează oricând cu o singură atingere' : 'Cancel anytime with one tap'}
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
 
         {/* Security / Stripe Trust */}
         <View style={styles.trustRow}>
-          <Text style={styles.trustText}>🔒 Encrypted & Secured • No hidden fees</Text>
+          <Text style={styles.trustText}>
+            {isRomanian ? '🔒 Criptat și Securizat • Fără taxe ascunse' : '🔒 Encrypted & Secured • No hidden fees'}
+          </Text>
         </View>
 
         {/* Submit Button */}
@@ -177,8 +200,8 @@ export default function PaywallScreen() {
               <>
                 <Text style={styles.actionButtonText}>
                   {selectedPlan === 'EARLY_BIRD'
-                    ? 'Claim 1 Year Free Protection'
-                    : 'Subscribe for $10.00 / year'}
+                    ? (isRomanian ? 'Activează 1 An Gratuit' : 'Claim 1 Year Free Protection')
+                    : (isRomanian ? 'Abonează-te cu $10.00 / an' : 'Subscribe for $10.00 / year')}
                 </Text>
                 <Text style={styles.arrowIcon}>→</Text>
               </>
@@ -203,6 +226,23 @@ const styles = StyleSheet.create({
   topHeader: {
     paddingTop: 8,
     marginBottom: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  stepBadge: {
+    backgroundColor: Colors.surfaceSecondary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  stepBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.primary,
+    letterSpacing: 0.5,
   },
   backCircle: {
     width: 44,

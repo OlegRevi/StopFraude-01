@@ -13,10 +13,12 @@ import { useRouter } from 'expo-router';
 import { isOnboardingCompleted } from '../services/storage';
 import { Colors } from '../constants/theme';
 import { StopFraudaBrand } from '../components/StopFraudaBrand';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
+  const { language, setLanguage, t, isRomanian } = useLanguage();
 
   useEffect(() => {
     async function checkStatus() {
@@ -43,9 +45,25 @@ export default function WelcomeScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Top Bar with Language Selector */}
         <View style={styles.topBar}>
-          <View style={styles.langPill}>
-            <Text style={styles.langIcon}>🌐</Text>
-            <Text style={styles.langText}>EN</Text>
+          <View style={styles.langSelector}>
+            <TouchableOpacity
+              style={[styles.langChoice, isRomanian && styles.langChoiceActive]}
+              activeOpacity={0.7}
+              onPress={() => setLanguage('ro')}
+            >
+              <Text style={[styles.langChoiceText, isRomanian && styles.langChoiceTextActive]}>
+                🇷🇴 RO
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.langChoice, !isRomanian && styles.langChoiceActive]}
+              activeOpacity={0.7}
+              onPress={() => setLanguage('en')}
+            >
+              <Text style={[styles.langChoiceText, !isRomanian && styles.langChoiceTextActive]}>
+                🇬🇧 EN
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -64,10 +82,12 @@ export default function WelcomeScreen() {
         <View style={styles.headerBox}>
           <StopFraudaBrand style={styles.appName} />
           <Text style={styles.mainTitle}>
-            Protect Your Loved Ones From Phone Scams
+            {t('welcomeTagline')}
           </Text>
           <Text style={styles.subtitle}>
-            AI-powered protection that alerts your family when suspicious calls are detected
+            {isRomanian
+              ? 'Protecție inteligentă care alertează instant familia ta când este detectat un apel suspect'
+              : 'AI-powered protection that alerts your family when suspicious calls are detected'}
           </Text>
         </View>
 
@@ -77,21 +97,21 @@ export default function WelcomeScreen() {
             <View style={styles.featureBadge}>
               <Text style={styles.badgeEmoji}>🛡️</Text>
             </View>
-            <Text style={styles.featureText}>Detect scam calls automatically</Text>
+            <Text style={styles.featureText}>{t('welcomeFeature1')}</Text>
           </View>
 
           <View style={styles.featureRow}>
             <View style={styles.featureBadge}>
               <Text style={styles.badgeEmoji}>🔔</Text>
             </View>
-            <Text style={styles.featureText}>Alert family members instantly</Text>
+            <Text style={styles.featureText}>{t('welcomeFeature2')}</Text>
           </View>
 
           <View style={styles.featureRow}>
             <View style={styles.featureBadge}>
               <Text style={styles.badgeEmoji}>🕒</Text>
             </View>
-            <Text style={styles.featureText}>24/7 protection for loved ones</Text>
+            <Text style={styles.featureText}>{t('welcomeFeature3')}</Text>
           </View>
         </View>
 
@@ -102,12 +122,14 @@ export default function WelcomeScreen() {
             activeOpacity={0.85}
             onPress={() => router.push('/permissions')}
           >
-            <Text style={styles.primaryButtonText}>Get Started</Text>
+            <Text style={styles.primaryButtonText}>{t('welcomeActivateBtn')}</Text>
             <Text style={styles.arrowIcon}>→</Text>
           </TouchableOpacity>
 
           <Text style={styles.promoText}>
-            🎉 Early Bird Special: 1 Year Free Protection Included!
+            {isRomanian
+              ? '🎉 Ofertă Specială: 1 An de Protecție Gratuită Inclus!'
+              : '🎉 Early Bird Special: 1 Year Free Protection Included!'}
           </Text>
         </View>
       </ScrollView>
@@ -135,22 +157,31 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingTop: 12,
   },
-  langPill: {
+  langSelector: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: Colors.surfaceSecondary,
     borderRadius: 20,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: Colors.border,
     gap: 4,
   },
-  langIcon: {
-    fontSize: 14,
+  langChoice: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
   },
-  langText: {
-    color: Colors.primary,
-    fontSize: 13,
+  langChoiceActive: {
+    backgroundColor: Colors.primary,
+  },
+  langChoiceText: {
+    color: Colors.textSecondary,
+    fontSize: 12,
     fontWeight: '700',
+  },
+  langChoiceTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
   heroContainer: {
     alignItems: 'center',

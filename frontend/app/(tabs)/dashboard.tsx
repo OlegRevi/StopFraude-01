@@ -29,6 +29,7 @@ import { ApiClient } from '../../services/api';
 import { EmergencyContact, CallLogEntry } from '../../types';
 import { Colors } from '../../constants/theme';
 import { StopFraudaBrand } from '../../components/StopFraudaBrand';
+import { useLanguage } from '../../context/LanguageContext';
 
 const AVATAR_COLORS = ['#EC4899', '#EF4444', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'];
 
@@ -37,6 +38,7 @@ function getInitialColor(index: number) {
 }
 
 export default function DashboardScreen() {
+  const { t, isRomanian } = useLanguage();
   const [isActive, setIsActive] = useState(true);
   const [guardians, setGuardians] = useState<EmergencyContact[]>([]);
   const [recentCalls, setRecentCalls] = useState<CallLogEntry[]>([]);
@@ -164,8 +166,8 @@ export default function DashboardScreen() {
                   ]}
                 >
                   {activeAlert.isUnknown
-                    ? 'UNKNOWN CALLER DETECTED!'
-                    : 'VERIFIED CONTACT CALL'}
+                    ? (isRomanian ? 'APELANT NECUNOSCUT DETECTAT!' : 'UNKNOWN CALLER DETECTED!')
+                    : (isRomanian ? 'APEL CONTACT VERIFICAT' : 'VERIFIED CONTACT CALL')}
                 </Text>
                 <Text
                   style={[
@@ -174,8 +176,10 @@ export default function DashboardScreen() {
                   ]}
                 >
                   {activeAlert.isUnknown
-                    ? `Number ${activeAlert.number} is NOT in contacts. SMS dispatched to ${guardians.length} guardians.`
-                    : `${activeAlert.name || 'Known contact'} (${activeAlert.number})`}
+                    ? (isRomanian
+                        ? `Numărul ${activeAlert.number} NU este în agendă. Alertă SMS trimisă către ${guardians.length} gardieni.`
+                        : `Number ${activeAlert.number} is NOT in contacts. SMS dispatched to ${guardians.length} guardians.`)
+                    : `${activeAlert.name || (isRomanian ? 'Contact cunoscut' : 'Known contact')} (${activeAlert.number})`}
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setActiveAlert(null)}>
@@ -189,9 +193,11 @@ export default function DashboardScreen() {
         <View style={[styles.statusCard, isActive ? styles.statusActive : styles.statusInactive]}>
           <View style={styles.statusHeaderRow}>
             <View>
-              <Text style={styles.statusLabel}>PROTECTION STATUS</Text>
+              <Text style={styles.statusLabel}>
+                {isRomanian ? 'STARE PROTECȚIE' : 'PROTECTION STATUS'}
+              </Text>
               <Text style={styles.statusTitle}>
-                {isActive ? 'Shield Active & Guarding' : 'Protection Paused'}
+                {isActive ? t('dashboardStatusActive') : t('dashboardStatusInactive')}
               </Text>
             </View>
             <Switch
@@ -220,16 +226,22 @@ export default function DashboardScreen() {
 
           <Text style={styles.statusFooterText}>
             {isActive
-              ? `Real-time call screening active • ${guardians.length} Guardian(s) on standby`
-              : 'Incoming unknown calls will not trigger SMS alerts'}
+              ? (isRomanian
+                  ? `Filtrare apeluri activă în timp real • ${guardians.length} Gardieni în alertă`
+                  : `Real-time call screening active • ${guardians.length} Guardian(s) on standby`)
+              : (isRomanian
+                  ? 'Apelurile necunoscute nu vor trimite alerte SMS'
+                  : 'Incoming unknown calls will not trigger SMS alerts')}
           </Text>
         </View>
 
         {/* Quick Simulator Bar */}
         <View style={styles.cardBox}>
-          <Text style={styles.sectionTitle}>🧪 Live Call Simulation</Text>
+          <Text style={styles.sectionTitle}>{t('dashboardSimulateTitle')}</Text>
           <Text style={styles.sectionSubtitle}>
-            Test how <StopFraudaBrand fontWeight="600" /> responds to incoming calls:
+            {isRomanian
+              ? 'Testează cum reacționează StopFrauda la apeluri:'
+              : 'Test how StopFrauda responds to incoming calls:'}
           </Text>
           <View style={styles.simButtonsRow}>
             <TouchableOpacity
@@ -238,7 +250,7 @@ export default function DashboardScreen() {
               onPress={() => handleSimulateCall(true)}
               disabled={simulating}
             >
-              <Text style={styles.simButtonText}>🚨 Unknown Caller</Text>
+              <Text style={styles.simButtonText}>{t('dashboardSimulateUnknown')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -247,7 +259,7 @@ export default function DashboardScreen() {
               onPress={() => handleSimulateCall(false)}
               disabled={simulating}
             >
-              <Text style={styles.simButtonText}>✅ Safe Contact</Text>
+              <Text style={styles.simButtonText}>{t('dashboardSimulateSafe')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -255,14 +267,14 @@ export default function DashboardScreen() {
         {/* Emergency Guardians List */}
         <View style={styles.cardBox}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>👨‍👩‍👧‍👦 Emergency Guardians</Text>
+            <Text style={styles.sectionTitle}>👨‍👩‍👧‍👦 {t('guardiansTitle')}</Text>
             <View style={styles.badgeCountBox}>
               <Text style={styles.badgeCountText}>{guardians.length}/5</Text>
             </View>
           </View>
 
           {guardians.length === 0 ? (
-            <Text style={styles.emptyText}>No emergency guardians designated.</Text>
+            <Text style={styles.emptyText}>{t('guardiansEmptyTitle')}</Text>
           ) : (
             guardians.map((g, idx) => (
               <View key={idx} style={styles.guardianRow}>
@@ -276,7 +288,9 @@ export default function DashboardScreen() {
                   <Text style={styles.guardianPhone}>{g.phone}</Text>
                 </View>
                 <View style={styles.verifiedTag}>
-                  <Text style={styles.verifiedText}>SMS READY</Text>
+                  <Text style={styles.verifiedText}>
+                    {isRomanian ? 'SMS ACTIV' : 'SMS READY'}
+                  </Text>
                 </View>
               </View>
             ))
@@ -285,11 +299,11 @@ export default function DashboardScreen() {
 
         {/* Recent Screened Calls Preview */}
         <View style={styles.cardBox}>
-          <Text style={styles.sectionTitle}>📞 Recent Call Screenings</Text>
+          <Text style={styles.sectionTitle}>📞 {t('dashboardRecentTitle')}</Text>
 
           {recentCalls.length === 0 ? (
             <Text style={styles.emptyText}>
-              No calls screened yet. Incoming calls will appear here.
+              {t('dashboardRecentEmpty')}
             </Text>
           ) : (
             recentCalls.map((c) => (
@@ -304,7 +318,9 @@ export default function DashboardScreen() {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}{' '}
-                    • {c.isUnknown ? 'Unknown (Alert Sent)' : 'Known Contact'}
+                    • {c.isUnknown
+                        ? (isRomanian ? 'Necunoscut (Alertă trimisă)' : 'Unknown (Alert Sent)')
+                        : (isRomanian ? 'Contact Cunoscut' : 'Known Contact')}
                   </Text>
                 </View>
               </View>

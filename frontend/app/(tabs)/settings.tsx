@@ -22,9 +22,11 @@ import {
 } from '../../services/storage';
 import { EmergencyContact, UserSubscription } from '../../types';
 import { Colors } from '../../constants/theme';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { language, setLanguage, t, isRomanian } = useLanguage();
 
   const [guardians, setGuardians] = useState<EmergencyContact[]>([]);
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
@@ -57,17 +59,20 @@ export default function SettingsScreen() {
 
   const handleSaveBackendUrl = async () => {
     await setStoredBackendUrl(backendUrl);
-    Alert.alert('Settings Saved', `Backend Cloud Run endpoint updated to: ${backendUrl}`);
+    Alert.alert(
+      isRomanian ? 'Setări Salvate' : 'Settings Saved',
+      `${t('settingsBackendSavedAlert')}: ${backendUrl}`
+    );
   };
 
   const handleResetSetup = async () => {
     Alert.alert(
-      'Reset StopFrauda Setup',
-      'Are you sure you want to re-run the onboarding and permissions guide?',
+      t('settingsResetConfirmTitle'),
+      t('settingsResetConfirmMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: t('settingsResetBtn'),
           style: 'destructive',
           onPress: async () => {
             await setOnboardingCompleted(false);
@@ -81,44 +86,99 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Language Selection Card */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionHeader}>{t('settingsLanguageHeader')}</Text>
+          <Text style={styles.inputSubtitle}>{t('settingsLanguageDesc')}</Text>
+
+          <View style={styles.langButtonRow}>
+            <TouchableOpacity
+              style={[
+                styles.langOptionCard,
+                isRomanian && styles.langOptionCardActive,
+              ]}
+              activeOpacity={0.8}
+              onPress={() => setLanguage('ro')}
+            >
+              <Text style={styles.langFlag}>🇷🇴</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.langOptionTitle, isRomanian && styles.langOptionTitleActive]}>
+                  Română
+                </Text>
+                <Text style={styles.langOptionSub}>
+                  {isRomanian ? 'Implicit (România)' : 'Default (Romania)'}
+                </Text>
+              </View>
+              {isRomanian && <Text style={styles.checkBadge}>✓</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.langOptionCard,
+                !isRomanian && styles.langOptionCardActive,
+              ]}
+              activeOpacity={0.8}
+              onPress={() => setLanguage('en')}
+            >
+              <Text style={styles.langFlag}>🇬🇧</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.langOptionTitle, !isRomanian && styles.langOptionTitleActive]}>
+                  English
+                </Text>
+                <Text style={styles.langOptionSub}>
+                  International
+                </Text>
+              </View>
+              {!isRomanian && <Text style={styles.checkBadge}>✓</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Subscription Plan Card */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>💳 Protection Subscription</Text>
+          <Text style={styles.sectionHeader}>{t('settingsPlanHeader')}</Text>
           <View style={styles.planBadgeRow}>
             <View style={styles.planBadge}>
               <Text style={styles.planBadgeText}>
                 {subscription?.planType === 'EARLY_BIRD'
-                  ? 'EARLY BIRD (1 YEAR FREE)'
-                  : 'STANDARD ANNUAL ($10/YR)'}
+                  ? (isRomanian ? 'OFERTĂ SPECIALĂ (1 AN GRATUIT)' : 'EARLY BIRD (1 YEAR FREE)')
+                  : (isRomanian ? 'STANDARD ANUAL ($10/AN)' : 'STANDARD ANNUAL ($10/YR)')}
               </Text>
             </View>
             <View style={styles.statusActiveBadge}>
-              <Text style={styles.statusActiveText}>ACTIVE</Text>
+              <Text style={styles.statusActiveText}>{t('settingsPlanActive')}</Text>
             </View>
           </View>
 
           <Text style={styles.planDetailText}>
-            Status: <Text style={styles.boldText}>{subscription?.status || 'active'}</Text>
+            {isRomanian ? 'Stare' : 'Status'}:{' '}
+            <Text style={styles.boldText}>{subscription?.status || 'active'}</Text>
           </Text>
           <Text style={styles.planDetailText}>
-            Renewal:{' '}
+            {isRomanian ? 'Reînnoire' : 'Renewal'}:{' '}
             <Text style={styles.boldText}>
               {subscription?.expiresAt
                 ? new Date(subscription.expiresAt).toLocaleDateString()
-                : '1 Year from activation'}
+                : (isRomanian ? '1 an de la activare' : '1 Year from activation')}
             </Text>
           </Text>
         </View>
 
         {/* Call Screening Preferences */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>🛡️ Call Protection Preferences</Text>
+          <Text style={styles.sectionHeader}>
+            {isRomanian ? '🛡️ Preferințe Filtrare Apeluri' : '🛡️ Call Protection Preferences'}
+          </Text>
 
           <View style={styles.settingRow}>
             <View style={styles.settingTextContainer}>
-              <Text style={styles.settingTitle}>Emergency Guardian SMS</Text>
+              <Text style={styles.settingTitle}>
+                {isRomanian ? 'Alerte SMS Gardieni de Urgență' : 'Emergency Guardian SMS'}
+              </Text>
               <Text style={styles.settingSubtitle}>
-                Instantly alert emergency guardians when an unknown caller rings
+                {isRomanian
+                  ? 'Alertează instantaneu gardienii prin SMS când sună un apel necunoscut'
+                  : 'Instantly alert emergency guardians when an unknown caller rings'}
               </Text>
             </View>
             <Switch
@@ -131,9 +191,13 @@ export default function SettingsScreen() {
 
           <View style={styles.settingRow}>
             <View style={styles.settingTextContainer}>
-              <Text style={styles.settingTitle}>Auto-Silence Unknowns</Text>
+              <Text style={styles.settingTitle}>
+                {isRomanian ? 'Respinge Numere Necunoscute' : 'Auto-Silence Unknowns'}
+              </Text>
               <Text style={styles.settingSubtitle}>
-                Automatically disallow calls from numbers not registered in contacts
+                {isRomanian
+                  ? 'Respinge automat apelurile provenite de la numere care nu sunt în agendă'
+                  : 'Automatically disallow calls from numbers not registered in contacts'}
               </Text>
             </View>
             <Switch
@@ -148,14 +212,18 @@ export default function SettingsScreen() {
         {/* Emergency Guardians Management */}
         <View style={styles.sectionCard}>
           <View style={styles.rowBetween}>
-            <Text style={styles.sectionHeader}>👨‍👩‍👧‍👦 Emergency Guardians</Text>
+            <Text style={styles.sectionHeader}>
+              👨‍👩‍👧‍👦 {t('guardiansTitle')}
+            </Text>
             <TouchableOpacity onPress={() => router.push('/contact-picker')}>
-              <Text style={styles.editText}>Edit (5 Max)</Text>
+              <Text style={styles.editText}>
+                {isRomanian ? 'Modifică (Max 5)' : 'Edit (5 Max)'}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {guardians.length === 0 ? (
-            <Text style={styles.emptyText}>No emergency guardians selected.</Text>
+            <Text style={styles.emptyText}>{t('guardiansEmptyTitle')}</Text>
           ) : (
             guardians.map((g, idx) => (
               <View key={idx} style={styles.guardianItem}>
@@ -168,9 +236,9 @@ export default function SettingsScreen() {
 
         {/* Cloud Run Backend URL Config */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>☁️ Cloud Run Backend Endpoint</Text>
+          <Text style={styles.sectionHeader}>{t('settingsBackendHeader')}</Text>
           <Text style={styles.inputSubtitle}>
-            Your Cloud Run backend API endpoint:
+            {isRomanian ? 'Endpoint API Cloud Run backend:' : 'Your Cloud Run backend API endpoint:'}
           </Text>
 
           <TextInput
@@ -187,7 +255,7 @@ export default function SettingsScreen() {
             activeOpacity={0.85}
             onPress={handleSaveBackendUrl}
           >
-            <Text style={styles.saveUrlText}>Save Backend URL</Text>
+            <Text style={styles.saveUrlText}>{t('settingsBackendSaveBtn')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -197,7 +265,7 @@ export default function SettingsScreen() {
           activeOpacity={0.8}
           onPress={handleResetSetup}
         >
-          <Text style={styles.resetButtonText}>Re-run Setup & Onboarding</Text>
+          <Text style={styles.resetButtonText}>{t('settingsResetBtn')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -365,5 +433,48 @@ const styles = StyleSheet.create({
     color: Colors.danger,
     fontSize: 14,
     fontWeight: '700',
+  },
+  langButtonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 6,
+  },
+  langOptionCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: Colors.surfaceSecondary,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+  },
+  langOptionCardActive: {
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primary,
+  },
+  langFlag: {
+    fontSize: 24,
+  },
+  langOptionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  langOptionTitleActive: {
+    color: Colors.primary,
+    fontWeight: '800',
+  },
+  langOptionSub: {
+    fontSize: 11,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  checkBadge: {
+    fontSize: 16,
+    color: Colors.primary,
+    fontWeight: '800',
   },
 });

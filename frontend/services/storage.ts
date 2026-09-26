@@ -15,6 +15,7 @@ const STORAGE_KEYS = {
   AUTO_REJECT: '@stopfrauda_auto_reject',
   ONBOARDING_DONE: '@stopfrauda_onboarding_done',
   BACKEND_URL: '@stopfrauda_backend_url',
+  LANGUAGE: '@stopfrauda_language',
 };
 
 // Generate persistent unique user ID
@@ -122,4 +123,26 @@ export async function getStoredBackendUrl(): Promise<string> {
 
 export async function setStoredBackendUrl(url: string): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEYS.BACKEND_URL, url);
+}
+
+export type SupportedLanguage = 'ro' | 'en';
+
+export async function getSavedLanguage(): Promise<SupportedLanguage> {
+  try {
+    const val = await AsyncStorage.getItem(STORAGE_KEYS.LANGUAGE);
+    if (val === 'en' || val === 'ro') {
+      return val;
+    }
+    return 'ro'; // Romanian is default
+  } catch {
+    return 'ro';
+  }
+}
+
+export async function saveLanguage(lang: SupportedLanguage): Promise<void> {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
+  } catch (e) {
+    console.error('Failed to save language setting', e);
+  }
 }

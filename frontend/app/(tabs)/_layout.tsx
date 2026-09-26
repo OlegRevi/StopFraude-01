@@ -2,8 +2,11 @@ import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import { Colors } from '../../constants/theme';
 import { StopFraudaBrand } from '../../components/StopFraudaBrand';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function TabLayout() {
+  const { t, isRomanian } = useLanguage();
+
   return (
     <Tabs
       screenOptions={{
@@ -40,9 +43,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Shield',
+          title: t('tabDashboard'),
           headerTitle: () => (
-            <StopFraudaBrand suffix="Shield" fontSize={18} />
+            <StopFraudaBrand suffix={isRomanian ? 'Scut' : 'Shield'} fontSize={18} />
           ),
           tabBarIcon: ({ color }) => (
             <Text style={{ fontSize: 20 }}>🛡️</Text>
@@ -52,8 +55,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'Call Logs',
-          headerTitle: 'Screened Calls',
+          title: isRomanian ? 'Istoric' : 'Call Logs',
+          headerTitle: isRomanian ? 'Apeluri Filtrate' : 'Screened Calls',
           tabBarIcon: ({ color }) => (
             <Text style={{ fontSize: 20 }}>📋</Text>
           ),
@@ -62,8 +65,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          headerTitle: 'Preferences & Plan',
+          title: t('tabSettings'),
+          headerTitle: isRomanian ? 'Preferințe & Abonament' : 'Preferences & Plan',
           tabBarIcon: ({ color }) => (
             <Text style={{ fontSize: 20 }}>⚙️</Text>
           ),

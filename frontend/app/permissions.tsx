@@ -14,9 +14,11 @@ import { useRouter } from 'expo-router';
 import * as Contacts from 'expo-contacts';
 import * as Notifications from 'expo-notifications';
 import { Colors } from '../constants/theme';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function PermissionsScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [contactsGranted, setContactsGranted] = useState(false);
   const [phoneGranted, setPhoneGranted] = useState(false);
@@ -114,7 +116,7 @@ export default function PermissionsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Top Header with Back Button */}
+        {/* Top Header with Back Button & Step Badge */}
         <View style={styles.topNav}>
           <TouchableOpacity
             style={styles.backCircle}
@@ -123,6 +125,9 @@ export default function PermissionsScreen() {
           >
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
+          <View style={styles.stepBadge}>
+            <Text style={styles.stepBadgeText}>{t('permStepBadge')}</Text>
+          </View>
         </View>
 
         {/* Center Key Icon Badge */}
@@ -134,9 +139,9 @@ export default function PermissionsScreen() {
 
         {/* Title & Subtitle */}
         <View style={styles.header}>
-          <Text style={styles.title}>We Need Your Permission</Text>
+          <Text style={styles.title}>{t('permTitle')}</Text>
           <Text style={styles.description}>
-            To protect you from scams, we need access to:
+            {t('permSubtitle')}
           </Text>
         </View>
 
@@ -152,9 +157,9 @@ export default function PermissionsScreen() {
               <Text style={styles.cardEmoji}>👥</Text>
             </View>
             <View style={styles.cardTextContainer}>
-              <Text style={styles.cardTitle}>Contacts</Text>
+              <Text style={styles.cardTitle}>{t('permContactsTitle')}</Text>
               <Text style={styles.cardSubtitle}>
-                To select emergency contacts from your phone
+                {t('permContactsDesc')}
               </Text>
             </View>
             <View style={[styles.statusBadge, contactsGranted ? styles.statusGranted : styles.statusPending]}>
@@ -172,9 +177,9 @@ export default function PermissionsScreen() {
               <Text style={styles.cardEmoji}>📞</Text>
             </View>
             <View style={styles.cardTextContainer}>
-              <Text style={styles.cardTitle}>Phone & Call Screening</Text>
+              <Text style={styles.cardTitle}>{t('permPhoneTitle')}</Text>
               <Text style={styles.cardSubtitle}>
-                To detect incoming calls and check unknown numbers in real-time
+                {t('permPhoneDesc')}
               </Text>
             </View>
             <View style={[styles.statusBadge, phoneGranted ? styles.statusGranted : styles.statusPending]}>
@@ -192,9 +197,9 @@ export default function PermissionsScreen() {
               <Text style={styles.cardEmoji}>🔔</Text>
             </View>
             <View style={styles.cardTextContainer}>
-              <Text style={styles.cardTitle}>Notifications</Text>
+              <Text style={styles.cardTitle}>{t('permNotifTitle')}</Text>
               <Text style={styles.cardSubtitle}>
-                To alert you when an unknown call is detected
+                {t('permNotifDesc')}
               </Text>
             </View>
             <View style={[styles.statusBadge, notificationsGranted ? styles.statusGranted : styles.statusPending]}>
@@ -210,7 +215,7 @@ export default function PermissionsScreen() {
             activeOpacity={0.85}
             onPress={handleContinue}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
+            <Text style={styles.continueButtonText}>{t('permContinueBtn')}</Text>
             <Text style={styles.continueButtonArrow}>→</Text>
           </TouchableOpacity>
         </View>
@@ -233,6 +238,23 @@ const styles = StyleSheet.create({
   topNav: {
     paddingTop: 8,
     marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  stepBadge: {
+    backgroundColor: Colors.surfaceSecondary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  stepBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.primary,
+    letterSpacing: 0.5,
   },
   backCircle: {
     width: 44,

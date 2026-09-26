@@ -27,13 +27,17 @@ import {
 import { EmergencyContact } from '../types';
 import { Colors } from '../constants/theme';
 import { StopFraudaBrand } from '../components/StopFraudaBrand';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SetupCompleteScreen() {
   const router = useRouter();
+  const { t, isRomanian } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
-  const [smsStatus, setSmsStatus] = useState<string>('Sending welcome SMS...');
+  const [smsStatus, setSmsStatus] = useState<string>(
+    isRomanian ? 'Se trimite SMS-ul de întâmpinare...' : 'Sending welcome SMS...'
+  );
   const [simulating, setSimulating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<string | null>(null);
 
@@ -56,15 +60,17 @@ export default function SetupCompleteScreen() {
       if (savedContacts.length > 0) {
         const res = await ApiClient.sendWelcomeContacts(userId, savedContacts);
         setSmsStatus(
-          `✅ Welcome SMS sent to ${res.sentCount} Emergency Guardian(s)!`
+          isRomanian
+            ? `✅ SMS de întâmpinare trimis către ${res.sentCount} gardian(i)!`
+            : `✅ Welcome SMS sent to ${res.sentCount} Emergency Guardian(s)!`
         );
       } else {
-        setSmsStatus('Protection ready.');
+        setSmsStatus(isRomanian ? 'Protecție pregătită.' : 'Protection ready.');
       }
 
       await setOnboardingCompleted(true);
     } catch (e: any) {
-      setSmsStatus('Protection active.');
+      setSmsStatus(isRomanian ? 'Protecție activată.' : 'Protection active.');
     } finally {
       setLoading(false);
     }
@@ -91,10 +97,15 @@ export default function SetupCompleteScreen() {
       });
 
       setSimulationResult(
-        `🚨 Simulation triggered! An unknown call alert banner was generated and an emergency SMS alert was dispatched for ${testNumber}.`
+        isRomanian
+          ? `🚨 Simulare declanșată! Un banner de alertă a fost afișat și o notificare SMS a fost trimisă pentru ${testNumber}.`
+          : `🚨 Simulation triggered! An unknown call alert banner was generated and an emergency SMS alert was dispatched for ${testNumber}.`
       );
     } catch (e: any) {
-      Alert.alert('Simulation Error', e.message || 'Could not run simulator');
+      Alert.alert(
+        isRomanian ? 'Eroare Simulare' : 'Simulation Error',
+        e.message || 'Could not run simulator'
+      );
     } finally {
       setSimulating(false);
     }
@@ -116,21 +127,24 @@ export default function SetupCompleteScreen() {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.stepBadge}>SETUP COMPLETE</Text>
-          <Text style={styles.title}>You Are Now Protected!</Text>
+          <Text style={styles.stepBadge}>{t('setupStepBadge')}</Text>
+          <Text style={styles.title}>{t('setupTitle')}</Text>
           <Text style={styles.subtitle}>
-            <StopFraudaBrand fontWeight="600" /> is actively guarding your phone against incoming fraud calls.
+            <StopFraudaBrand fontWeight="600" />{' '}
+            {isRomanian
+              ? 'păzește activ telefonul tău împotriva apelurilor frauduloase.'
+              : 'is actively guarding your phone against incoming fraud calls.'}
           </Text>
         </View>
 
         {/* SMS Status Box */}
         <View style={styles.smsBox}>
-          <Text style={styles.smsHeader}>📱 Guardian SMS Status</Text>
+          <Text style={styles.smsHeader}>{t('setupSmsHeader')}</Text>
           {loading ? (
             <View style={styles.loadingRow}>
               <ActivityIndicator size="small" color={Colors.primary} />
               <Text style={styles.smsStatusText}>
-                Notifying emergency guardians via SMS...
+                {t('setupSmsSending')}
               </Text>
             </View>
           ) : (
@@ -154,9 +168,11 @@ export default function SetupCompleteScreen() {
           <View style={styles.simulatorHeader}>
             <Text style={styles.simulatorIcon}>🧪</Text>
             <View style={{ flex: 1 }}>
-              <Text style={styles.simulatorTitle}>Test Call Simulator</Text>
+              <Text style={styles.simulatorTitle}>{t('setupSimTitle')}</Text>
               <Text style={styles.simulatorDesc}>
-                Experience how <StopFraudaBrand fontWeight="600" /> alerts you when a scammer calls.
+                {isRomanian
+                  ? 'Testează cum te avertizează StopFrauda când sună un număr necunoscut.'
+                  : 'Experience how StopFrauda alerts you when a scammer calls.'}
               </Text>
             </View>
           </View>
@@ -178,7 +194,9 @@ export default function SetupCompleteScreen() {
             ) : (
               <>
                 <Text style={styles.simulatorButtonText}>
-                  Simulate Unknown Incoming Call
+                  {isRomanian
+                    ? 'Simulează Apel Necunoscut'
+                    : 'Simulate Unknown Incoming Call'}
                 </Text>
                 <Text style={styles.testEmoji}>🔔</Text>
               </>
@@ -193,7 +211,9 @@ export default function SetupCompleteScreen() {
             activeOpacity={0.85}
             onPress={handleGoToDashboard}
           >
-            <Text style={styles.dashboardButtonText}>Enter Dashboard</Text>
+            <Text style={styles.dashboardButtonText}>
+              {isRomanian ? 'Mergi la Panoul de Control' : 'Enter Dashboard'}
+            </Text>
             <Text style={styles.arrowIcon}>→</Text>
           </TouchableOpacity>
         </View>

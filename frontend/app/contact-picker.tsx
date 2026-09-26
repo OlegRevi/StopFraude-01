@@ -15,6 +15,7 @@ import * as Contacts from 'expo-contacts';
 import { EmergencyContact } from '../types';
 import { saveLocalContacts, getLocalContacts } from '../services/storage';
 import { Colors } from '../constants/theme';
+import { useLanguage } from '../context/LanguageContext';
 
 const AVATAR_COLORS = [
   '#EC4899', // Pink
@@ -46,6 +47,7 @@ function getInitials(name: string): string {
 
 export default function ContactPickerScreen() {
   const router = useRouter();
+  const { t, isRomanian } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [phonebookContacts, setPhonebookContacts] = useState<Contacts.Contact[]>([]);
@@ -130,8 +132,8 @@ export default function ContactPickerScreen() {
     } else {
       if (selectedContacts.length >= 5) {
         Alert.alert(
-          'Maximum Guardians Reached',
-          'You can designate up to 5 emergency guardians. Deselect one first to add another.'
+          t('contactsMaxReachedTitle'),
+          t('contactsMaxReachedMsg')
         );
         return;
       }
@@ -151,8 +153,8 @@ export default function ContactPickerScreen() {
   const handleContinue = async () => {
     if (selectedContacts.length === 0) {
       Alert.alert(
-        'Guardian Required',
-        'At least one emergency guardian is mandatory to protect your phone. Please select a contact to alert if a scam is detected.'
+        t('contactsAlertRequiredTitle'),
+        t('contactsAlertRequiredMsg')
       );
       return;
     }
@@ -177,15 +179,15 @@ export default function ContactPickerScreen() {
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <View style={styles.stepBadge}>
-          <Text style={styles.stepBadgeText}>STEP 3 OF 5</Text>
+          <Text style={styles.stepBadgeText}>{t('contactsStepBadge')}</Text>
         </View>
       </View>
 
       {/* Title & Subtitle */}
       <View style={styles.header}>
-        <Text style={styles.title}>Emergency Contacts</Text>
+        <Text style={styles.title}>{t('contactsTitle')}</Text>
         <Text style={styles.subtitle}>
-          Who should we alert if a scam is detected?
+          {t('contactsSubtitle')}
         </Text>
 
         {/* Search Bar */}
@@ -193,7 +195,7 @@ export default function ContactPickerScreen() {
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search your contacts..."
+            placeholder={t('contactsSearchPlaceholder')}
             placeholderTextColor={Colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -209,7 +211,7 @@ export default function ContactPickerScreen() {
         <View style={styles.infoBanner}>
           <Text style={styles.infoIcon}>ℹ️</Text>
           <Text style={styles.infoText}>
-            Only contacts already in your phone can be added
+            {t('contactsInfoBanner')}
           </Text>
           <TouchableOpacity onPress={loadContacts}>
             <Text style={styles.refreshIcon}>🔄</Text>
@@ -221,7 +223,7 @@ export default function ContactPickerScreen() {
       {selectedContacts.length > 0 && (
         <View style={styles.selectedRow}>
           <Text style={styles.selectedCountBadge}>
-            Selected ({selectedContacts.length}/5):
+            {t('contactsSelectedLabel')} ({selectedContacts.length}/5):
           </Text>
           <FlatList
             data={selectedContacts}
@@ -262,9 +264,9 @@ export default function ContactPickerScreen() {
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyEmoji}>👥</Text>
-              <Text style={styles.emptyText}>No contacts found</Text>
+              <Text style={styles.emptyText}>{t('contactsEmptyTitle')}</Text>
               <Text style={styles.emptySubtext}>
-                Make sure contacts permission is granted in Settings.
+                {t('contactsEmptySubtext')}
               </Text>
             </View>
           }
@@ -315,7 +317,7 @@ export default function ContactPickerScreen() {
       <View style={styles.footerContainer}>
         {selectedContacts.length === 0 && (
           <Text style={styles.hintNotice}>
-            ⚠️ At least 1 emergency guardian is mandatory
+            {t('contactsMandatoryNotice')}
           </Text>
         )}
 
@@ -335,8 +337,12 @@ export default function ContactPickerScreen() {
             ]}
           >
             {selectedContacts.length > 0
-              ? `Continue with ${selectedContacts.length} Guardian${selectedContacts.length > 1 ? 's' : ''}`
-              : 'Select at Least 1 Guardian'}
+              ? `${t('contactsContinueSelected')} ${selectedContacts.length} ${
+                  isRomanian
+                    ? selectedContacts.length > 1 ? 'Gardieni' : 'Gardian'
+                    : selectedContacts.length > 1 ? 'Guardians' : 'Guardian'
+                }`
+              : t('contactsContinueBtn')}
           </Text>
           {selectedContacts.length > 0 && (
             <Text style={styles.continueButtonArrow}>→</Text>

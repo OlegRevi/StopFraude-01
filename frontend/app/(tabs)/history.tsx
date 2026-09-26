@@ -10,10 +10,12 @@ import {
 import { getLocalCallLogs } from '../../services/storage';
 import { CallLogEntry } from '../../types';
 import { Colors } from '../../constants/theme';
+import { useLanguage } from '../../context/LanguageContext';
 
 type FilterType = 'ALL' | 'UNKNOWN' | 'SAFE';
 
 export default function HistoryScreen() {
+  const { isRomanian } = useLanguage();
   const [logs, setLogs] = useState<CallLogEntry[]>([]);
   const [filter, setFilter] = useState<FilterType>('ALL');
   const [refreshing, setRefreshing] = useState(false);
@@ -49,7 +51,7 @@ export default function HistoryScreen() {
               filter === 'ALL' && styles.filterTabTextActive,
             ]}
           >
-            All ({logs.length})
+            {isRomanian ? 'Toate' : 'All'} ({logs.length})
           </Text>
         </TouchableOpacity>
 
@@ -66,7 +68,7 @@ export default function HistoryScreen() {
               filter === 'UNKNOWN' && styles.filterTabTextActive,
             ]}
           >
-            🚨 Unknown ({logs.filter((l) => l.isUnknown).length})
+            {isRomanian ? '🚨 Necunoscute' : '🚨 Unknown'} ({logs.filter((l) => l.isUnknown).length})
           </Text>
         </TouchableOpacity>
 
@@ -80,7 +82,7 @@ export default function HistoryScreen() {
               filter === 'SAFE' && styles.filterTabTextActive,
             ]}
           >
-            ✅ Contacts ({logs.filter((l) => !l.isUnknown).length})
+            {isRomanian ? '✅ Agendă' : '✅ Contacts'} ({logs.filter((l) => !l.isUnknown).length})
           </Text>
         </TouchableOpacity>
       </View>
@@ -125,8 +127,8 @@ export default function HistoryScreen() {
                     ]}
                   >
                     {item.isUnknown
-                      ? 'UNKNOWN CALLER • NOT IN CONTACTS'
-                      : 'VERIFIED CONTACT'}
+                      ? (isRomanian ? 'APELANT NECUNOSCUT • NU ESTE ÎN AGENDĂ' : 'UNKNOWN CALLER • NOT IN CONTACTS')
+                      : (isRomanian ? 'CONTACT VERIFICAT' : 'VERIFIED CONTACT')}
                   </Text>
                 </View>
               </View>
@@ -143,8 +145,8 @@ export default function HistoryScreen() {
               <View style={styles.alertDetailBox}>
                 <Text style={styles.alertDetailText}>
                   {item.alertDispatched
-                    ? '⚡ Emergency SMS alert dispatched to guardians'
-                    : 'Alert recorded locally'}
+                    ? (isRomanian ? '⚡ Alertă SMS de urgență trimisă către gardieni' : '⚡ Emergency SMS alert dispatched to guardians')
+                    : (isRomanian ? 'Alertă înregistrată local' : 'Alert recorded locally')}
                 </Text>
               </View>
             )}
@@ -153,9 +155,13 @@ export default function HistoryScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyEmoji}>📋</Text>
-            <Text style={styles.emptyTitle}>No call logs recorded yet</Text>
+            <Text style={styles.emptyTitle}>
+              {isRomanian ? 'Niciun apel înregistrat încă' : 'No call logs recorded yet'}
+            </Text>
             <Text style={styles.emptySubtitle}>
-              Incoming calls will be screened and logged here in real-time.
+              {isRomanian
+                ? 'Apelurile primite vor fi filtrate și afișate aici în timp real.'
+                : 'Incoming calls will be screened and logged here in real-time.'}
             </Text>
           </View>
         }
