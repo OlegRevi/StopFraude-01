@@ -44,7 +44,7 @@
       "./plugins/withCallDetector.js"
     ],
     "extra": {
-      "backendUrl": "http://10.0.2.2:8080"
+      "backendUrl": "https://stopfrauda-backend-539120389345.europe-west1.run.app"
     }
   }
 }
