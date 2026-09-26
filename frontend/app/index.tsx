@@ -42,19 +42,12 @@ export default function WelcomeScreen() {
           <View style={styles.iconCircle}>
             <Text style={styles.iconEmoji}>🛡️</Text>
           </View>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>SCAM SHIELD • ZERO TRANSCRIPTION</Text>
-          </View>
         </View>
 
         {/* Title & Core Value Proposition */}
         <Text style={styles.appName}>StopFrauda</Text>
         <Text style={styles.tagline}>
           Never worry about phone scams again.
-        </Text>
-        <Text style={styles.subtext}>
-          StopFrauda screens incoming calls against your contacts. If an unknown number rings,
-          we instantly alert your emergency guardians via SMS so you are never targeted alone.
         </Text>
 
         {/* Feature Highlights */}
