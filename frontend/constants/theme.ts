@@ -39,6 +39,10 @@ export const Colors = {
   info: '#3B82F6',             // Blue for info notices
   infoLight: '#EFF6FF',
 
+  // Brand / Wordmark Colors
+  brandStop: '#0BBF98',        // Vibrant emerald green from brand wordmark
+  brandFrauda: '#000000',      // Black for Frauda
+
   // Component specific
   disabledButton: '#E2E8F0',
   disabledText: '#94A3B8',

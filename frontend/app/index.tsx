@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { isOnboardingCompleted } from '../services/storage';
 import { Colors } from '../constants/theme';
+import { StopFraudaBrand } from '../components/StopFraudaBrand';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function WelcomeScreen() {
 
         {/* Main Title & Subtitle */}
         <View style={styles.headerBox}>
-          <Text style={styles.appName}>StopFrauda</Text>
+          <StopFraudaBrand style={styles.appName} />
           <Text style={styles.mainTitle}>
             Protect Your Loved Ones From Phone Scams
           </Text>
@@ -179,12 +180,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   appName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: Colors.primary,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    marginBottom: 6,
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   mainTitle: {
     fontSize: 27,

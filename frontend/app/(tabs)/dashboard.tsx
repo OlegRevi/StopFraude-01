@@ -28,6 +28,7 @@ import {
 import { ApiClient } from '../../services/api';
 import { EmergencyContact, CallLogEntry } from '../../types';
 import { Colors } from '../../constants/theme';
+import { StopFraudaBrand } from '../../components/StopFraudaBrand';
 
 const AVATAR_COLORS = ['#EC4899', '#EF4444', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'];
 
@@ -228,7 +229,7 @@ export default function DashboardScreen() {
         <View style={styles.cardBox}>
           <Text style={styles.sectionTitle}>🧪 Live Call Simulation</Text>
           <Text style={styles.sectionSubtitle}>
-            Test how StopFrauda responds to incoming calls:
+            Test how <StopFraudaBrand fontWeight="600" /> responds to incoming calls:
           </Text>
           <View style={styles.simButtonsRow}>
             <TouchableOpacity

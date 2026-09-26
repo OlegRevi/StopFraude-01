@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import { Colors } from '../../constants/theme';
+import { StopFraudaBrand } from '../../components/StopFraudaBrand';
 
 export default function TabLayout() {
   return (
@@ -40,7 +41,9 @@ export default function TabLayout() {
         name="dashboard"
         options={{
           title: 'Shield',
-          headerTitle: 'StopFrauda Shield',
+          headerTitle: () => (
+            <StopFraudaBrand suffix="Shield" fontSize={18} />
+          ),
           tabBarIcon: ({ color }) => (
             <Text style={{ fontSize: 20 }}>🛡️</Text>
           ),

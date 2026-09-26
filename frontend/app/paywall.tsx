@@ -14,6 +14,7 @@ import { ApiClient } from '../services/api';
 import { getOrCreateUserId, saveLocalSubscription } from '../services/storage';
 import { PlanType } from '../types';
 import { Colors } from '../constants/theme';
+import { StopFraudaBrand } from '../components/StopFraudaBrand';
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function PaywallScreen() {
           <View style={styles.promoTextContainer}>
             <Text style={styles.promoTitle}>Early Bird Special Active</Text>
             <Text style={styles.promoDesc}>
-              1 full year of StopFrauda protection completely free!
+              1 full year of <StopFraudaBrand fontWeight="700" /> protection completely free!
             </Text>
           </View>
         </View>

@@ -26,6 +26,7 @@ import {
 } from 'expo-call-detector';
 import { EmergencyContact } from '../types';
 import { Colors } from '../constants/theme';
+import { StopFraudaBrand } from '../components/StopFraudaBrand';
 
 export default function SetupCompleteScreen() {
   const router = useRouter();
@@ -118,7 +119,7 @@ export default function SetupCompleteScreen() {
           <Text style={styles.stepBadge}>SETUP COMPLETE</Text>
           <Text style={styles.title}>You Are Now Protected!</Text>
           <Text style={styles.subtitle}>
-            StopFrauda is actively guarding your phone against incoming fraud calls.
+            <StopFraudaBrand fontWeight="600" /> is actively guarding your phone against incoming fraud calls.
           </Text>
         </View>
 
@@ -155,7 +156,7 @@ export default function SetupCompleteScreen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.simulatorTitle}>Test Call Simulator</Text>
               <Text style={styles.simulatorDesc}>
-                Experience how StopFrauda alerts you when a scammer calls.
+                Experience how <StopFraudaBrand fontWeight="600" /> alerts you when a scammer calls.
               </Text>
             </View>
           </View>
