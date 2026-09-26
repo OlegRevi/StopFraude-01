@@ -4,11 +4,11 @@
     "slug": "stopfrauda",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "dark",
     "scheme": "stopfrauda",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/images/splash-image.png",
       "resizeMode": "contain",
       "backgroundColor": "#0F172A"
     },
@@ -17,10 +17,11 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0F172A"
       },
-      "package": "ro.stopfrauda.app",
+      "package": "com.stopfrauda.app",
+      "versionCode": 15,
       "permissions": [
         "android.permission.READ_CONTACTS",
         "android.permission.READ_PHONE_STATE",
@@ -31,8 +32,10 @@
         "android.permission.FOREGROUND_SERVICE_PHONE_CALL",
         "android.permission.INTERNET",
         "android.permission.VIBRATE"
-      ]
+      ],
+      "googleServicesFile": "./google-services.json"
     },
+    "owner": "olegrwvi",
     "plugins": [
       "expo-router",
       [
@@ -44,7 +47,13 @@
       "./plugins/withCallDetector.js"
     ],
     "extra": {
+      "eas": {
+        "projectId": "1f95dadc-57eb-4301-9305-4df6e41aa9f0"
+      },
       "backendUrl": "https://stopfrauda-backend-539120389345.europe-west1.run.app"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/1f95dadc-57eb-4301-9305-4df6e41aa9f0"
     }
   }
 }
