@@ -17,6 +17,11 @@ module.exports = function withCallDetector(config) {
       'android.permission.POST_NOTIFICATIONS',
       'android.permission.FOREGROUND_SERVICE',
       'android.permission.FOREGROUND_SERVICE_PHONE_CALL',
+      'android.permission.WAKE_LOCK',
+      'android.permission.RECEIVE_BOOT_COMPLETED',
+      'android.permission.ACCESS_NETWORK_STATE',
+      'android.permission.USE_FULL_SCREEN_INTENT',
+      'android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
       'android.permission.INTERNET',
       'android.permission.VIBRATE',
     ];
@@ -37,14 +42,20 @@ module.exports = function withCallDetector(config) {
       }
     }
 
-    // 2. Add services to <application>
+    // 2. Add services and receivers to <application>
     const application = androidManifest.application[0];
     if (!application.service) {
       application.service = [];
     }
+    if (!application.receiver) {
+      application.receiver = [];
+    }
 
     const existingServices = new Set(
       application.service.map((s) => s.$['android:name'])
+    );
+    const existingReceivers = new Set(
+      application.receiver.map((r) => r.$['android:name'])
     );
 
     // CallScreeningService declaration
@@ -79,6 +90,34 @@ module.exports = function withCallDetector(config) {
           'android:foregroundServiceType': 'phoneCall',
           'android:exported': 'false',
         },
+      });
+    }
+
+    // Boot Receiver declaration (auto-restart protection upon phone reboot)
+    const bootReceiverClass = 'ro.stopfrauda.calldetector.BootReceiver';
+    if (!existingReceivers.has(bootReceiverClass)) {
+      application.receiver.push({
+        $: {
+          'android:name': bootReceiverClass,
+          'android:enabled': 'true',
+          'android:exported': 'true',
+        },
+        'intent-filter': [
+          {
+            action: [
+              {
+                $: {
+                  'android:name': 'android.intent.action.BOOT_COMPLETED',
+                },
+              },
+              {
+                $: {
+                  'android:name': 'android.intent.action.MY_PACKAGE_REPLACED',
+                },
+              },
+            ],
+          },
+        ],
       });
     }
 

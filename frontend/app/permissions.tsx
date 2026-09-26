@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform,
   Alert,
+  PermissionsAndroid,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Contacts from 'expo-contacts';
@@ -18,7 +19,7 @@ export default function PermissionsScreen() {
   const router = useRouter();
 
   const [contactsGranted, setContactsGranted] = useState(false);
-  const [phoneGranted, setPhoneGranted] = useState(true); // Default true for simulation/OS
+  const [phoneGranted, setPhoneGranted] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,14 @@ export default function PermissionsScreen() {
     try {
       const contactsRes = await Contacts.getPermissionsAsync();
       setContactsGranted(contactsRes.status === 'granted');
+
+      if (Platform.OS === 'android') {
+        const phoneState = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE);
+        const callLog = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_CALL_LOG);
+        setPhoneGranted(phoneState && callLog);
+      } else {
+        setPhoneGranted(true);
+      }
 
       const notifRes = await Notifications.getPermissionsAsync();
       setNotificationsGranted(notifRes.status === 'granted');
@@ -46,6 +55,25 @@ export default function PermissionsScreen() {
     }
   };
 
+  const handleRequestPhone = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const results = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+          PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,
+        ]);
+        const isGranted =
+          results[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE] === PermissionsAndroid.RESULTS.GRANTED &&
+          results[PermissionsAndroid.PERMISSIONS.READ_CALL_LOG] === PermissionsAndroid.RESULTS.GRANTED;
+        setPhoneGranted(isGranted);
+      } catch (err) {
+        console.warn('Error requesting phone permissions:', err);
+      }
+    } else {
+      setPhoneGranted(true);
+    }
+  };
+
   const handleRequestNotifications = async () => {
     try {
       const res = await Notifications.requestPermissionsAsync();
@@ -60,6 +88,16 @@ export default function PermissionsScreen() {
       if (!contactsGranted) {
         const res = await Contacts.requestPermissionsAsync();
         setContactsGranted(res.status === 'granted');
+      }
+      if (Platform.OS === 'android' && !phoneGranted) {
+        const results = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+          PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,
+        ]);
+        const isGranted =
+          results[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE] === PermissionsAndroid.RESULTS.GRANTED &&
+          results[PermissionsAndroid.PERMISSIONS.READ_CALL_LOG] === PermissionsAndroid.RESULTS.GRANTED;
+        setPhoneGranted(isGranted);
       }
       if (!notificationsGranted) {
         const res = await Notifications.requestPermissionsAsync();
@@ -125,20 +163,24 @@ export default function PermissionsScreen() {
           </TouchableOpacity>
 
           {/* Card 2: Phone */}
-          <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.8}
+            onPress={handleRequestPhone}
+          >
             <View style={styles.cardLeftIcon}>
               <Text style={styles.cardEmoji}>📞</Text>
             </View>
             <View style={styles.cardTextContainer}>
-              <Text style={styles.cardTitle}>Phone</Text>
+              <Text style={styles.cardTitle}>Phone & Call Screening</Text>
               <Text style={styles.cardSubtitle}>
-                To detect incoming calls in real-time
+                To detect incoming calls and check unknown numbers in real-time
               </Text>
             </View>
             <View style={[styles.statusBadge, phoneGranted ? styles.statusGranted : styles.statusPending]}>
               <Text style={[styles.statusCheck, phoneGranted && styles.statusCheckActive]}>✓</Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Card 3: Notifications */}
           <TouchableOpacity
